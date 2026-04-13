@@ -1,0 +1,1935 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HomeKit 墙纸设计器</title>
+  <style>
+  :root {
+    --bg: #000000;
+    --surface: #1c1c1e;
+    --surface2: #2c2c2e;
+    --border: #3a3a3c;
+    --text: #f5f5f7;
+    --text-dim: #8e8e93;
+    --accent: #30B0C7;
+    --accent-25: rgba(48,176,199,0.25);
+    --accent-10: rgba(48,176,199,0.10);
+    --accent-06: rgba(48,176,199,0.06);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+  [data-theme="light"] {
+    --bg: #f5f5f7;
+    --surface: #ffffff;
+    --surface2: #f0f0f2;
+    --border: #d2d2d7;
+    --text: #1d1d1f;
+    --text-dim: #86868b;
+    --accent: #1a9aaf;
+    --accent-25: rgba(26,154,175,0.25);
+    --accent-10: rgba(26,154,175,0.10);
+    --accent-06: rgba(26,154,175,0.06);
+  }
+  /* ── Dark mode canvas area ── */
+  [data-theme="dark"] .canvas-area { background: #000000; }
+  [data-theme="dark"] .canvas-wrapper { background: #000000; }
+  [data-theme="dark"] .canvas-wrapper::before { background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); }
+  [data-theme="dark"] #preview-canvas { box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 40px 80px rgba(0,0,0,0.8); }
+  [data-theme="dark"] .sidebar { background: #0f0f0f; }
+  [data-theme="dark"] header { background: rgba(10,10,10,0.92); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); }
+  [data-theme="dark"] .section { border-bottom: 1px solid var(--border); }
+  [data-theme="dark"] .sidebar { border-right: 1px solid var(--border); }
+  [data-theme="dark"] .canvas-toolbar { background: rgba(10,10,10,0.75); backdrop-filter: saturate(160%) blur(20px); -webkit-backdrop-filter: saturate(160%) blur(20px); border-bottom: 1px solid var(--border); }
+  [data-theme="dark"] .info-bar {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+  }
+  .info-row-main {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 8px;
+    flex-wrap: wrap;
+  }
+  .info-row-zoom {
+    display: flex;
+    justify-content: flex-end;
+    padding: 2px 8px 4px;
+  }
+  
+  .info-row-main {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 8px;
+    flex-wrap: wrap;
+  }
+  .info-row-zoom {
+    display: flex;
+    justify-content: flex-end;
+    padding: 2px 8px 4px;
+  }
+  
+  [data-theme="dark"] .section-label::after { background: var(--border); }
+  /* ── Light mode ── */
+  [data-theme="light"] .canvas-area { background: var(--bg); }
+  [data-theme="light"] .canvas-wrapper { background: var(--bg); }
+  [data-theme="light"] .canvas-wrapper::before { background-image: linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px); }
+  [data-theme="light"] #preview-canvas { box-shadow: 0 0 0 1px rgba(0,0,0,0.06), 0 24px 48px rgba(0,0,0,0.12); }
+  [data-theme="light"] .sidebar { background: var(--surface); border-right: 1px solid var(--border); }
+  [data-theme="light"] header { background: rgba(245,245,247,0.80); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid var(--border); }
+  [data-theme="light"] .section { border-bottom: 1px solid var(--border); }
+  [data-theme="light"] .canvas-toolbar { background: rgba(245,245,247,0.72); backdrop-filter: saturate(160%) blur(20px); -webkit-backdrop-filter: saturate(160%) blur(20px); border-bottom: 1px solid var(--border); }
+  [data-theme="light"] .info-bar { background: var(--surface); border-top: 1px solid var(--border); }
+  [data-theme="light"] .section-label::after { background: var(--border); }
+  [data-theme="light"] .theme-btn:hover { background: var(--surface2); }
+  [data-theme="light"] .logo-dot { background: var(--accent); }
+  [data-theme="light"] .slider::-webkit-slider-thumb { box-shadow: 0 0 8px var(--accent-25); }
+  [data-theme="light"] .btn-export { box-shadow: 0 4px 12px var(--accent-25); }
+  [data-theme="light"] .btn-export:hover { box-shadow: 0 6px 16px var(--accent-25); }
+  [data-theme="light"] .stop-pos-slider::-webkit-slider-thumb { box-shadow: 0 0 6px var(--accent-25); }
+  [data-theme="light"] .zoom-slider::-webkit-slider-thumb { box-shadow: 0 0 6px var(--accent-25); }
+  /* ── Reset ── */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    font-size: 13px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    height: 52px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text);
+  }
+  .logo-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+    position: relative;
+  }
+  .logo-dot::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--accent-25) 0%, transparent 70%);
+    animation: logo-pulse 3s ease-in-out infinite;
+  }
+  @keyframes logo-pulse {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 0.9; transform: scale(1.4); }
+  }
+  .header-meta { font-size: 11px; color: var(--text-dim); letter-spacing: 0; }
+  .header-actions { display: flex; align-items: center; gap: 8px; height: 36px; flex-shrink: 0; }
+  .theme-btn {
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
+    width: 32px; height: 32px;
+    cursor: pointer;
+    color: var(--text-dim);
+    font-size: 15px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s var(--ease);
+  }
+  .theme-btn:hover { background: var(--surface2); color: var(--text); }
+  /* ── App Layout ── */
+  .app {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    height: calc(100vh - 52px);
+  }
+  .sidebar {
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  /* ── Sections ── */
+  .section { padding: 16px 20px; }
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  /* ── Presets ── */
+  .presets-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .preset-btn {
+    aspect-ratio: 1;
+    border-radius: var(--radius-md);
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s var(--ease), transform 0.2s var(--ease);
+    position: relative;
+    overflow: hidden;
+  }
+  .preset-btn:hover { opacity: 0.85; transform: scale(1.05); }
+  .preset-btn.active { box-shadow: 0 0 0 3px var(--accent); }
+  .preset-btn .preset-label {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(0,0,0,0.65);
+    color: #fff;
+    font-size: 10px;
+    text-align: center;
+    padding: 3px;
+    letter-spacing: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .preset-btn:hover .preset-label { opacity: 1; }
+  /* ── Room Icons ── */
+  .room-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .room-btn {
+    background: var(--surface2);
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 10px 4px;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.2s var(--ease);
+    color: var(--text-dim);
+    font-size: 11px;
+    min-height: 58px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.2;
+  }
+  .room-btn .room-icon { font-size: 20px; display: block; flex-shrink: 0; }
+  .room-btn:hover { background: var(--border); color: var(--text); }
+  .room-btn.active { background: var(--accent-10); color: var(--accent); }
+  /* ── Type Tabs ── */
+  .type-tabs { display: flex; gap: 4px; background: var(--surface2); border-radius: var(--radius-sm); padding: 3px; }
+  .type-tab {
+    flex: 1;
+    background: none;
+    border: none;
+    border-radius: 6px;
+    padding: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: background 0.2s var(--ease), color 0.2s var(--ease);
+  }
+  .type-tab.active { background: var(--accent); color: #fff; }
+  /* ── Blend Tabs ── */
+  .blend-tabs { display: flex; gap: 3px; background: var(--surface2); border-radius: var(--radius-sm); padding: 3px; }
+  .blend-tab {
+    flex: 1;
+    background: none;
+    border: none;
+    border-radius: 6px;
+    padding: 5px 2px;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: background 0.2s var(--ease), color 0.2s var(--ease);
+  }
+  .blend-tab.active { background: var(--accent); color: #fff; }
+  /* ── Direction ── */
+  .direction-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+  .dir-btn {
+    background: var(--surface2);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 6px 2px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 13px;
+    transition: background 0.2s var(--ease);
+    color: var(--text-dim);
+  }
+  .dir-btn:hover { background: var(--border); }
+  .dir-btn.active { background: var(--accent-10); color: var(--accent); }
+  .dir-btn .dir-label { display: block; font-size: 9px; letter-spacing: 0; margin-top: 2px; color: var(--text-dim); }
+  .dir-btn.active .dir-label { color: var(--accent); }
+  /* ── Color Stops ── */
+  .color-stops { display: flex; flex-direction: column; gap: 8px; }
+  .collapsible-label { cursor: pointer; user-select: none; }
+  .collapse-arrow { font-size: 10px; transition: transform 0.2s var(--ease); display: inline-block; }
+  .collapsible-label[data-collapsed="true"] .collapse-arrow { transform: rotate(-90deg); }
+  .color-stops-compact { display: none; height: 24px; border-radius: var(--radius-sm); overflow: hidden; margin-bottom: 4px; }
+  .color-stops-compact-bar { height: 100%; width: 100%; }
+  .color-stops-body { overflow: hidden; transition: max-height 0.3s var(--ease), opacity 0.2s var(--ease); }
+  .color-stops-body.collapsed { max-height: 0 !important; opacity: 0; pointer-events: none; }
+  .color-stop-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface2);
+    border-radius: var(--radius-md);
+    padding: 8px 10px;
+  }
+  .color-swatch {
+    width: 28px; height: 28px;
+    border-radius: var(--radius-sm);
+    cursor: grab;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .color-swatch:active { cursor: grabbing; }
+  .color-swatch.dragging { opacity: 0.4; }
+  .color-swatch input[type="color"] {
+    position: absolute;
+    inset: -4px;
+    width: calc(100% + 8px);
+    height: calc(100% + 8px);
+    opacity: 0;
+    cursor: pointer;
+  }
+  .stop-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+  .stop-hex { font-size: 11px; color: var(--text); font-family: 'SF Mono', 'Fira Code', monospace; display: flex; align-items: center; justify-content: space-between; letter-spacing: 0; }
+  .stop-pct { font-size: 12px; color: var(--text-dim); font-family: 'SF Mono', 'Fira Code', monospace; letter-spacing: 0; }
+  .stop-pos { display: flex; align-items: center; gap: 8px; }
+  .stop-pos-slider { width: 100%; -webkit-appearance: none; height: 4px; background: var(--border); border-radius: 2px; outline: none; flex: 1; }
+  .stop-pos-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 6px var(--accent-25); }
+  .stop-remove { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 16px; padding: 2px; transition: color 0.2s; line-height: 1; flex-shrink: 0; }
+  .stop-remove:hover { color: var(--accent); }
+  .add-stop-btn { width: 100%; background: none; border: 1.5px dashed var(--border); border-radius: var(--radius-md); padding: 8px; color: var(--text-dim); font-size: 12px; cursor: pointer; transition: border-color 0.2s, color 0.2s; letter-spacing: 0; }
+  .add-stop-btn:hover { border-color: var(--accent); color: var(--accent); }
+  /* ── Controls ── */
+  .control-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .control-label { font-size: 12px; color: var(--text-dim); letter-spacing: 0; }
+  .control-value { font-size: 12px; color: var(--text-dim); min-width: 40px; text-align: right; font-family: 'SF Mono', 'Fira Code', monospace; letter-spacing: 0; }
+  .slider { width: 100%; -webkit-appearance: none; height: 4px; background: var(--border); border-radius: 2px; outline: none; margin-bottom: 8px; }
+  .slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 8px var(--accent-25); }
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .toggle { width: 44px; height: 26px; background: var(--surface2); border: none; border-radius: 13px; cursor: pointer; position: relative; transition: background 0.3s var(--ease); flex-shrink: 0; }
+  .toggle.on { background: var(--accent); }
+  .toggle::after { content: ''; position: absolute; width: 22px; height: 22px; border-radius: 50%; background: #fff; top: 2px; left: 2px; transition: transform 0.3s var(--ease); box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
+  .toggle.on::after { transform: translateX(18px); }
+  /* ── Overlay ── */
+  .overlay-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .overlay-btn { background: var(--surface2); border: none; border-radius: var(--radius-md); padding: 10px 4px; cursor: pointer; text-align: center; transition: background 0.2s var(--ease); color: var(--text-dim); font-size: 11px; }
+  .overlay-btn .ov-preview { width: 100%; height: 32px; border-radius: 4px; margin-bottom: 5px; }
+  .overlay-btn:hover { background: var(--border); color: var(--text); }
+  .overlay-btn.active { background: var(--accent-06); color: var(--accent); }
+  /* ── Canvas Area ── */
+  .canvas-area { display: flex; flex-direction: column; position: relative; overflow: hidden; min-height: 0; height: calc(100vh - 52px); }
+  .canvas-toolbar { display: flex; align-items: center; justify-content: space-between; padding: 8px 20px; flex-shrink: 0; height: 56px; box-sizing: border-box; position: relative; z-index: 10; }
+  .size-selector { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; flex-shrink: 0; flex-wrap: nowrap; align-items: center; height: 36px; box-sizing: border-box; }
+  .size-selector::-webkit-scrollbar { display: none; }
+  .size-btn { background: none; border: none; border-radius: var(--radius-sm); padding: 6px 10px; font-size: 11px; color: var(--text-dim); cursor: pointer; transition: background 0.2s, color 0.2s; white-space: nowrap; flex-shrink: 0; }
+  .size-btn:hover { background: var(--surface2); color: var(--text); }
+  .size-btn.active { background: var(--surface2); color: var(--accent); font-weight: 600; }
+  .toolbar-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+  .btn-export { background: var(--accent); border: none; border-radius: var(--radius-md); padding: 8px 18px; font-size: 12px; font-weight: 600; color: #fff; cursor: pointer; transition: opacity 0.2s, box-shadow 0.2s; letter-spacing: 0; }
+  .btn-export:hover { opacity: 0.88; }
+  .export-dropdown { position: relative; display: inline-block; }
+  .export-dropdown-menu { position: absolute; top: calc(100% + 6px); right: 0; min-width: 120px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: 0 8px 32px rgba(0,0,0,0.5); opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity 0.2s, transform 0.2s, visibility 0.2s; z-index: 100; overflow: hidden; }
+  .export-dropdown:hover .export-dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+  .export-dropdown-item { display: block; width: 100%; background: none; border: none; padding: 12px 16px; text-align: left; font-size: 12px; color: var(--text-dim); cursor: pointer; transition: background 0.15s; }
+  .export-dropdown-item:hover { background: var(--surface2); color: var(--text); }
+  .export-dropdown-item.active { color: var(--accent); }
+  .zoom-selector { display: flex; align-items: center; gap: 6px; }
+  .zoom-selector label { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+  .zoom-slider { width: 70px; }
+
+  .zoom-selector label { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+  
+  .zoom-selector label {
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  
+  .zoom-selector label {
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .zoom-slider {
+    width: 70px;
+  }
+  
+  .zoom-selector label { font-size: 12px; color: var(--text-dim); white-space: nowrap; letter-spacing: 0; }
+  .zoom-slider { -webkit-appearance: none; appearance: none; width: 112px; height: 4px; background: var(--border); border-radius: 2px; outline: none; cursor: pointer; }
+  .zoom-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); border: none; cursor: pointer; transition: box-shadow 0.2s; }
+  .zoom-slider::-webkit-slider-thumb:hover { box-shadow: 0 0 10px var(--accent-25); }
+  .zoom-slider::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--accent); border: none; cursor: pointer; }
+  .zoom-pct { font-size: 11px; color: var(--accent); min-width: 32px; text-align: right; font-family: 'SF Mono', 'Fira Code', monospace; letter-spacing: 0; }
+  .canvas-wrapper { flex: 1; display: flex; align-items: center; justify-content: center; overflow: auto; min-height: 0; padding: 24px; max-height: 100%; position: relative; }
+  
+  .deco-settings { display: none; padding: 8px 0 4px; border-top: 1px solid var(--border); margin-top: 2px; }
+  .deco-select { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 11px; padding: 4px 8px; outline: none; cursor: pointer; width: 100%; }
+  .slider-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .slider-row .control-label { min-width: 0; flex: 1; font-size: 11px; }
+  .slider-row .slider { flex: 1; min-width: 0; }
+  .slider-row .control-value { font-size: 11px; color: var(--text); min-width: 36px; text-align: right; }
+  .canvas-wrapper::before { content: ''; position: absolute; inset: 0; background-size: 40px 40px; pointer-events: none; z-index: 0; }
+  #preview-canvas { border-radius: var(--radius-lg); flex-shrink: 0; position: relative; z-index: 1; }
+  .info-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 20px; height: 36px; box-sizing: border-box; font-size: 11px; color: var(--text-dim); flex-shrink: 0; }
+  .info-item { display: flex; align-items: center; gap: 6px; }
+  .info-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--text-dim); }
+  @media (max-width: 900px) {
+    .app { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+    .sidebar { max-height: 50vh; }
+  }
+  /* ── Onboarding Overlay ── */
+  .onboarding-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,0.55); backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    animation: fadeIn 0.4s var(--ease);
+  }
+  .onboarding-overlay.hiding { animation: fadeOut 0.3s var(--ease) forwards; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+  .onboarding-card {
+    background: var(--surface); border-radius: var(--radius-lg);
+    padding: 32px 36px; max-width: 420px; width: 90%;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.3);
+    text-align: center;
+  }
+  .onboarding-card h2 { font-size: 20px; font-weight: 700; margin-bottom: 16px; color: var(--text); }
+  .onboarding-card p { font-size: 13px; color: var(--text-dim); line-height: 1.6; margin-bottom: 12px; }
+  .onboarding-card .tip { display: flex; align-items: center; gap: 8px; text-align: left; padding: 6px 0; font-size: 12px; color: var(--text); }
+  .onboarding-card .tip-icon { font-size: 16px; flex-shrink: 0; }
+  .onboarding-start {
+    margin-top: 20px; padding: 10px 32px; border-radius: var(--radius-sm);
+    background: var(--accent); color: #fff; border: none; font-size: 14px;
+    font-weight: 600; cursor: pointer; transition: transform 0.15s var(--ease), box-shadow 0.2s var(--ease);
+  }
+  .onboarding-start:hover { transform: scale(1.03); box-shadow: 0 4px 16px var(--accent-25); }
+
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><div class="logo-dot"></div>HomeKit 墙纸设计器</div>
+  <div class="header-actions">
+    <div class="header-meta" data-i18n="engine">v1.3 · Gradient Engine · by:Zan</div>
+    <button class="theme-btn" id="lang-toggle" title="切换语言" data-i18n="switchLang">🌐</button>
+    <button class="theme-btn" id="theme-toggle" title="切换明暗模式" data-i18n="toggleTheme">🌙</button>
+  </div>
+</header>
+<div class="app">
+  <aside class="sidebar">
+    <div class="section">
+      <div class="section-label" data-i18n="presets">预设方案</div>
+      <div class="presets-grid" id="presets-grid"></div>
+    </div>
+    <div class="section">
+      <div class="section-label" data-i18n="roomType">房间类型</div>
+      <div class="room-grid" id="room-grid">
+        <button class="room-btn active" data-room="living"><span class="room-icon">🛋️</span>客厅</button>
+        <button class="room-btn" data-room="bedroom"><span class="room-icon">🛏️</span>卧室</button>
+        <button class="room-btn" data-room="kitchen"><span class="room-icon">🍳</span>厨房</button>
+        <button class="room-btn" data-room="dining"><span class="room-icon">🍽️</span>餐厅</button>
+        <button class="room-btn" data-room="bathroom"><span class="room-icon">🚿</span>浴室</button>
+        <button class="room-btn" data-room="toilet"><span class="room-icon">🚽</span>厕所</button>
+        <button class="room-btn" data-room="office"><span class="room-icon">💻</span>办公室</button>
+        <button class="room-btn" data-room="study"><span class="room-icon">📚</span>书房</button>
+        <button class="room-btn" data-room="hallway"><span class="room-icon">🚪</span>过道</button>
+        <button class="room-btn" data-room="balcony"><span class="room-icon">🌅</span>阳台</button>
+        <button class="room-btn" data-room="entryway"><span class="room-icon">🧥</span>玄关</button>
+        <button class="room-btn" data-room="garage"><span class="room-icon">🚗</span>车库</button>
+        <button class="room-btn" data-room="garden"><span class="room-icon">🌿</span>花园</button>
+        <button class="room-btn" data-room="gym"><span class="room-icon">🏋️</span>健身房</button>
+        <button class="room-btn" data-room="kids"><span class="room-icon">🧸</span>儿童房</button>
+        <button class="room-btn" data-room="laundry"><span class="room-icon">🧺</span>洗衣房</button>
+        <button class="room-btn" data-room="storage"><span class="room-icon">📦</span>储藏室</button>
+        <button class="room-btn" data-room="upload" id="upload-btn"><span class="room-icon">📤</span>上传图标</button>
+      </div>
+      <input type="file" id="icon-upload" accept=".png,.svg,.jpg,.jpeg,.webp" style="display:none">
+    </div>
+    <div class="section">
+      <div class="section-label" data-i18n="gradientType">渐变类型</div>
+      <div class="type-tabs" id="type-tabs">
+        <button class="type-tab active" data-type="linear" data-i18n="linear">线性</button>
+        <button class="type-tab" data-type="radial" data-i18n="radial">径向</button>
+        <button class="type-tab" data-type="mesh" data-i18n="mesh">网格</button>
+      </div>
+    </div>
+    <div class="section" id="direction-section">
+      <div class="section-label" data-i18n="direction">渐变方向</div>
+      <div class="direction-grid" id="direction-grid">
+        <button class="dir-btn active" data-angle="0">↑<span class="dir-label">上</span></button>
+        <button class="dir-btn" data-angle="45">↗<span class="dir-label">右上</span></button>
+        <button class="dir-btn" data-angle="90">→<span class="dir-label">右</span></button>
+        <button class="dir-btn" data-angle="135">↘<span class="dir-label">右下</span></button>
+        <button class="dir-btn" data-angle="180">↓<span class="dir-label">下</span></button>
+        <button class="dir-btn" data-angle="225">↙<span class="dir-label">左下</span></button>
+        <button class="dir-btn" data-angle="270">←<span class="dir-label">左</span></button>
+        <button class="dir-btn" data-angle="315">↖<span class="dir-label">左上</span></button>
+      </div>
+    </div>
+    <div class="section" id="color-stops-section">
+      <div class="section-label collapsible-label" id="color-stops-toggle" data-collapsed="false">
+        <span class="collapse-arrow">▾</span>
+        <span data-i18n="colorStops">颜色节点</span>
+      </div>
+      <div class="color-stops-compact" id="color-stops-compact"></div>
+      <div class="color-stops-body" id="color-stops-body">
+        <div class="color-stops" id="color-stops"></div>
+        <button class="add-stop-btn" id="add-stop-btn" style="margin-top:8px">+ 添加颜色节点</button>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-label" data-i18n="effects">效果</div>
+      <div class="toggle-row"><span class="control-label" data-i18n="noise">噪点纹理</span><div class="toggle" id="toggle-noise" onclick="toggleEffect('noise')"></div></div>
+      <div class="control-row"><span class="control-label" data-i18n="noiseIntensity">噪点强度</span><span class="control-value" id="val-noise">0.03</span></div>
+      <input type="range" class="slider" id="slider-noise" min="0" max="0.12" step="0.005" value="0.03" oninput="document.getElementById('val-noise').textContent=parseFloat(this.value).toFixed(3);render()">
+      <div class="toggle-row"><span class="control-label" data-i18n="vignette">暗角效果</span><div class="toggle" id="toggle-vignette" onclick="toggleEffect('vignette')"></div></div>
+      <div class="control-row"><span class="control-label" data-i18n="vignetteIntensity">暗角强度</span><span class="control-value" id="val-vignette">0.45</span></div>
+      <input type="range" class="slider" id="slider-vignette" min="0" max="1" step="0.05" value="0.45" oninput="document.getElementById('val-vignette').textContent=parseFloat(this.value).toFixed(2);render()">
+    </div>
+    <div class="section">
+      <div class="section-label" data-i18n="decoSection">&#x623F;&#x95F4;&#x88C5;&#x9970;</div>
+      <div class="toggle-row"><span class="control-label" data-i18n="deco">&#x623F;&#x95F4;&#x88C5;&#x9970;</span><div class="toggle" id="toggle-deco" onclick="toggleEffect('deco')"><div class="toggle-thumb"></div></div></div>
+      <div id="deco-settings" style="display:none;padding:8px 0 4px">
+        <div class="control-row"><span class="control-label" data-i18n="decoCount">&#x8D34;&#x7EB8;&#x6570;&#x91CF;</span><span class="control-value" id="val-deco-count">14</span></div>
+        <input type="range" class="slider" id="slider-deco-count" min="4" max="50" value="14">
+        <div class="control-row"><span class="control-label" data-i18n="decoSizeMin">&#x6700;&#x5C0F;&#x5C3A;&#x5BF9;</span><span class="control-value" id="val-deco-size-min">24px</span></div>
+        <input type="range" class="slider" id="slider-deco-size-min" min="10" max="60" value="24">
+        <div class="control-row"><span class="control-label" data-i18n="decoSizeMax">&#x6700;&#x5927;&#x5C3A;&#x5BF9;</span><span class="control-value" id="val-deco-size-max">80px</span></div>
+        <input type="range" class="slider" id="slider-deco-size-max" min="30" max="140" value="80">
+        <div class="control-row"><span class="control-label" data-i18n="decoOpacity">&#x8D34;&#x7EB8;&#x900F;&#x660E;&#x5EA6;</span><span class="control-value" id="val-deco-opacity">72%</span></div>
+        <input type="range" class="slider" id="slider-deco-opacity" min="10" max="100" value="72">
+        <div class="control-row" style="margin-top:4px"><span class="control-label" data-i18n="decoBlend">混个模式</span></div>
+        <div id="select-deco-blend" class="blend-tabs" style="display:flex;gap:3px;background:var(--surface2);border-radius:var(--radius-sm);padding:3px;margin-bottom:4px">
+          <button class="blend-tab active" data-value="screen" onclick="setBlendMode(this)">Screen</button>
+          <button class="blend-tab" data-value="overlay" onclick="setBlendMode(this)">Overlay</button>
+          <button class="blend-tab" data-value="soft-light" onclick="setBlendMode(this)">Soft</button>
+          <button class="blend-tab" data-value="normal" onclick="setBlendMode(this)">Normal</button>
+        </div>
+      </div>
+    </div>
+    <div class="section" id="icon-control-section">
+      <div class="section-label" data-i18n="roomIcon">房间图标</div>
+      <div class="toggle-row"><span class="control-label" data-i18n="showIcon">显示图标</span><div class="toggle" id="toggle-icon" onclick="toggleEffect('icon')"></div></div>
+      <div id="icon-settings" style="margin-top:10px">
+      <div class="control-row"><span class="control-label" data-i18n="iconSize">图标大小</span><span class="control-value" id="val-icon-size">15%</span></div>
+      <input type="range" class="slider" id="slider-icon-size" min="5" max="40" step="1" value="15" oninput="document.getElementById('val-icon-size').textContent=this.value+'%';render()">
+      <div class="control-row"><span class="control-label" data-i18n="iconX">水平位置</span><span class="control-value" id="val-icon-x">50%</span></div>
+      <input type="range" class="slider" id="slider-icon-x" min="0" max="100" step="1" value="50" oninput="document.getElementById('val-icon-x').textContent=this.value+'%';render()">
+      <div class="control-row"><span class="control-label" data-i18n="iconY">垂直位置</span><span class="control-value" id="val-icon-y">50%</span></div>
+      <input type="range" class="slider" id="slider-icon-y" min="0" max="100" step="1" value="50" oninput="document.getElementById('val-icon-y').textContent=this.value+'%';render()">
+      <div class="control-row"><span class="control-label" data-i18n="iconOpacity">图标透明度</span><span class="control-value" id="val-icon-opacity">12%</span></div>
+      <input type="range" class="slider" id="slider-icon-opacity" min="3" max="50" step="1" value="12" oninput="document.getElementById('val-icon-opacity').textContent=this.value+'%';render()">
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-label" data-i18n="overlay">叠加特效</div>
+      <div class="overlay-grid" id="overlay-grid"></div>
+    </div>
+  </aside>
+  <main class="canvas-area">
+    <div class="canvas-toolbar">
+      <div class="size-selector" id="size-selector">
+        <button class="size-btn" data-size="iphone14">iPhone 14</button>
+        <button class="size-btn" data-size="iphone14promax">iPhone 14 Pro Max</button>
+        <button class="size-btn" data-size="iphone15">iPhone 15</button>
+        <button class="size-btn active" data-size="iphone15pro">iPhone 15 Pro</button>
+        <button class="size-btn" data-size="iphone16">iPhone 16</button>
+        <button class="size-btn" data-size="iphone16pro">iPhone 16 Pro</button>
+        <button class="size-btn" data-size="iphone17">iPhone 17</button>
+        <button class="size-btn" data-size="iphone17pro">iPhone 17 Pro</button>
+        <button class="size-btn" data-size="ipadsquare">iPad 方形</button>
+        <button class="size-btn" data-size="ipadpro">iPad Pro</button>
+        <button class="size-btn" data-size="desktop">桌面</button>
+      </div>
+      <div class="toolbar-actions">
+        <div class="export-dropdown">
+          <button class="btn-export" data-i18n="export">导出</button>
+          <div class="export-dropdown-menu">
+            <button class="export-dropdown-item" data-format="png" onclick="exportImage('png')" data-i18n="exportPNG">导出 PNG</button>
+            <button class="export-dropdown-item" data-format="jpeg" onclick="exportImage('jpeg')" data-i18n="exportJPEG">导出 JPEG</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="canvas-wrapper"><canvas id="preview-canvas"></canvas></div>
+    <div class="info-bar">
+      <div class="info-row-main"><div class="info-item"><div class="info-dot" style="background:#6366f1"></div><span id="info-size">1290 × 2796</span></div><div class="info-item"><div class="info-dot" style="background:#a855f7"></div><span id="info-type"></span></div><div class="info-item"><div class="info-dot" style="background:#22c55e"></div><span id="info-stops">4 个节点</span></div>
+      </div>
+      <div class="zoom-selector" id="zoom-selector">
+        <label data-i18n="zoom">缩放</label>
+        <input type="range" class="zoom-slider" id="zoom-slider" min="0" max="5" step="1" value="4">
+        <span class="zoom-pct" id="zoom-pct">75%</span>
+      </div>
+    </div>
+  </main>
+</div>
+<div class="onboarding-overlay" id="onboarding" style="display:none">
+  <div class="onboarding-card">
+    <h2>🎨 HomeKit 墙纸设计器</h2>
+    <p>为你的 HomeKit 房间创建精美渐变墙纸</p>
+    <div class="tip"><span class="tip-icon">🎨</span>选择预设或自定义渐变颜色</div>
+    <div class="tip"><span class="tip-icon">🏠</span>18 种房间类型，搭配专属装饰贴纸</div>
+    <div class="tip"><span class="tip-icon">✨</span>9 种叠加特效，噪点/暗角/星尘</div>
+    <div class="tip"><span class="tip-icon">📱</span>多设备尺寸，一键导出 PNG/JPEG</div>
+    <button class="onboarding-start" id="onboarding-start">开始设计</button>
+  </div>
+</div>
+<script>
+  console.log('[SCRIPT] Starting...');
+  window.onerror = function(m,src,line,col,err) {
+    console.error('[GLOBAL_ERR]', m, 'at line', line, col, src?'src:'+src:'');
+    return true;
+  };
+
+const state = {
+  gradientType: 'linear',
+  angle: 45,
+  stops: [
+    { color: '#FFE4D6', pos: 0 },
+    { color: '#FFCBA4', pos: 0.25 },
+    { color: '#FFAA85', pos: 0.5 },
+    { color: '#F58B8B', pos: 0.75 },
+    { color: '#C26DAD', pos: 1 }
+  ],
+  effects: { noise: false, vignette: false, bloom: true, icon: false, deco: false },
+  overlay: 'none',
+  canvasW: 1290,
+  canvasH: 2796,
+  room: 'living',
+  iconSize: 15,
+  iconX: 50,
+  iconY: 50,
+  iconOpacity: 12,
+  customIcon: null,
+  decoCount: 14,
+  decoSizeMin: 24,
+  decoSizeMax: 80,
+  decoOpacity: 0.72,
+  decoBlend: 'screen',
+  _decoCache: null,
+  zoomScale: 1
+};
+
+// 国际化
+let lang = localStorage.getItem('wallpaper-lang') || 'zh';
+let starSeed = 0;
+const I18N = {
+  zh: {
+    title: 'HomeKit 墙纸设计器',
+    presets: '预设方案',
+    roomType: '房间类型',
+    toggleTheme: '切换明暗模式',
+    switchLang: '切换语言',
+    gradientType: '渐变类型',
+    linear: '线性',
+    radial: '径向',
+    mesh: '网格',
+    direction: '渐变方向',
+    colorStops: '颜色节点',
+    addStop: '+ 添加颜色节点',
+    effects: '效果',
+    noise: '噪点纹理',
+    noiseIntensity: '噪点强度',
+    vignette: '暗角效果',
+    vignetteIntensity: '暗角强度',
+    decoSection: '房间装饰',
+    deco: '房间装饰',
+    decoCount: '贴纸数量',
+    decoSizeMin: '最小尺寸',
+    decoSizeMax: '最大尺寸',
+    decoOpacity: '贴纸透明度',
+    decoBlend: '混合模式',
+    bloom: '柔和光晕',
+    roomIcon: '房间图标',
+    showIcon: '显示图标',
+    iconSize: '图标大小',
+    iconX: '水平位置',
+    iconY: '垂直位置',
+    iconOpacity: '图标透明度',
+    overlay: '叠加特效',
+    overlayNone: '无',
+    lightBeam: '光带',
+    lightOrb: '光球',
+    dualOrb: '双色光球',
+    aurora: '极光',
+    star: '星尘',
+    lens: '镜头光晕',
+    vapor: '蒸汽波',
+    sunset: '霞光',
+    export: '导出',
+    zoom: '缩放',
+    exportPNG: '导出 PNG',
+    exportJPEG: '导出 JPEG',
+    presetNames: { sunset: '日落余晖', ocean: '海洋微风', mint: '薄荷清新', lavender: '薰衣草梦', peach: '蜜桃渐变', aurora: '极光流转', rose: '玫瑰金', golden: '金色时刻', sky: '天空蓝', tropical: '热带风情', cotton: '棉花糖', night: '晚霞紫' },
+    rooms: { living: '客厅', bedroom: '卧室', kitchen: '厨房', dining: '餐厅', bathroom: '浴室', toilet: '厕所', office: '办公室', study: '书房', hallway: '过道', balcony: '阳台', entryway: '玄关', garage: '车库', garden: '花园', gym: '健身房', kids: '儿童房', laundry: '洗衣房', storage: '储藏室', upload: '上传图标' },
+    dirLabels: { '0': '上', '45': '右上', '90': '右', '135': '右下', '180': '下', '225': '左下', '270': '左', '315': '左上' },
+    stops: '个节点',
+    exportFormat: '导出格式',
+    engine: 'v1.3 · 渐变引擎 · by:Zan',
+    sizes: { 'iphone15pro': 'iPhone 15 Pro', 'iphone15': 'iPhone 15', 'iphone16pro': 'iPhone 16 Pro', 'iphone16': 'iPhone 16', 'iphone17pro': 'iPhone 17 Pro', 'iphone17': 'iPhone 17', 'iphone14promax': 'iPhone 14 Pro Max', 'iphone14': 'iPhone 14', 'ipadsquare': 'iPad 方形', 'ipadpro': 'iPad Pro', 'desktop': '桌面' }
+  },
+  en: {
+    title: 'HomeKit Wallpaper Designer',
+    presets: 'Presets',
+    roomType: 'Room Type',
+    toggleTheme: 'Toggle Theme',
+    switchLang: 'Switch Language',
+    gradientType: 'Gradient Type',
+    linear: 'Linear',
+    radial: 'Radial',
+    mesh: 'Mesh',
+    direction: 'Direction',
+    colorStops: 'Color Stops',
+    addStop: '+ Add Color Stop',
+    effects: 'Effects',
+    noise: 'Noise Texture',
+    noiseIntensity: 'Noise Intensity',
+    vignette: 'Vignette',
+    vignetteIntensity: 'Vignette Intensity',
+    decoSection: 'Room Decor',
+    deco: 'Room Decor',
+    decoCount: 'Sticker Count',
+    decoSizeMin: 'Min Size',
+    decoSizeMax: 'Max Size',
+    decoOpacity: 'Sticker Opacity',
+    decoBlend: 'Blend Mode',
+    bloom: 'Soft Bloom',
+    roomIcon: 'Room Icon',
+    showIcon: 'Show Icon',
+    iconSize: 'Icon Size',
+    iconX: 'Horizontal Position',
+    iconY: 'Vertical Position',
+    iconOpacity: 'Icon Opacity',
+    overlay: 'Overlay Effects',
+    overlayNone: 'None',
+    lightBeam: 'Light Beam',
+    lightOrb: 'Light Orb',
+    dualOrb: 'Dual Orb',
+    aurora: 'Aurora',
+    star: 'Stardust',
+    lens: 'Lens Flare',
+    vapor: 'Vaporwave',
+    sunset: 'Sunset Glow',
+    export: 'Export',
+    zoom: 'Zoom',
+    exportPNG: 'Export PNG',
+    exportJPEG: 'Export JPEG',
+    presetNames: { sunset: 'Sunset Glow', ocean: 'Ocean Breeze', mint: 'Mint Fresh', lavender: 'Lavender Dream', peach: 'Peach Gradient', aurora: 'Aurora Flow', rose: 'Rose Gold', golden: 'Golden Hour', sky: 'Sky Blue', tropical: 'Tropical Vibes', cotton: 'Cotton Candy', night: 'Twilight Purple' },
+    rooms: { living: 'Living', bedroom: 'Bedroom', kitchen: 'Kitchen', dining: 'Dining', bathroom: 'Bathroom', toilet: 'Toilet', office: 'Office', study: 'Study', hallway: 'Hallway', balcony: 'Balcony', entryway: 'Entryway', garage: 'Garage', garden: 'Garden', gym: 'Gym', kids: 'Kids Room', laundry: 'Laundry', storage: 'Storage', upload: 'Upload Icon' },
+    dirLabels: { '0': 'Up', '45': 'Up-Right', '90': 'Right', '135': 'Down-Right', '180': 'Down', '225': 'Down-Left', '270': 'Left', '315': 'Up-Left' },
+    stops: ' stops',
+    exportFormat: 'Format',
+    engine: 'v1.3 · Gradient Engine · by:Zan',
+    sizes: { 'iphone15pro': 'iPhone 15 Pro', 'iphone15': 'iPhone 15', 'iphone16pro': 'iPhone 16 Pro', 'iphone16': 'iPhone 16', 'iphone17pro': 'iPhone 17 Pro', 'iphone17': 'iPhone 17', 'iphone14promax': 'iPhone 14 Pro Max', 'iphone14': 'iPhone 14', 'ipadsquare': 'iPad Square', 'ipadpro': 'iPad Pro', 'desktop': 'Desktop' }
+  }
+};
+
+function t(key) { return I18N[lang][key] || key; }
+
+// 尺寸映射
+const SIZE_MAP = {
+  'iphone15pro': { w: 1290, h: 2796, key: 'iphone15pro' },
+  'iphone15': { w: 1179, h: 2556, key: 'iphone15' },
+  'iphone16pro': { w: 1320, h: 2868, key: 'iphone16pro' },
+  'iphone16': { w: 1206, h: 2622, key: 'iphone16' },
+  'iphone17pro': { w: 1320, h: 2868, key: 'iphone17pro' },
+  'iphone17': { w: 1206, h: 2622, key: 'iphone17' },
+  'iphone14promax': { w: 1284, h: 2778, key: 'iphone14promax' },
+  'iphone14': { w: 1170, h: 2532, key: 'iphone14' },
+  'ipadsquare': { w: 2048, h: 2048, key: 'ipadsquare' },
+  'ipadpro': { w: 2732, h: 2048, key: 'ipadpro' },
+  'desktop': { w: 1920, h: 1080, key: 'desktop' }
+};
+
+const OVERLAYS = [
+  { id: 'none', nameKey: 'overlayNone', preview: 'linear-gradient(135deg, var(--surface2) 0%, var(--border) 100%)' },
+  { id: 'lightBeam', nameKey: 'lightBeam', preview: 'linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 50%)' },
+  { id: 'lightOrb', nameKey: 'lightOrb', preview: 'radial-gradient(circle at 50% 35%, rgba(255,250,240,0.5) 0%, rgba(255,240,220,0.2) 30%, transparent 70%)' },
+  { id: 'dualOrb', nameKey: 'dualOrb', preview: 'radial-gradient(circle at 30% 40%, rgba(180,100,255,0.3) 0%, transparent 40%), radial-gradient(circle at 70% 60%, rgba(100,200,255,0.25) 0%, transparent 40%)' },
+  { id: 'aurora', nameKey: 'aurora', preview: 'linear-gradient(180deg, transparent 30%, rgba(100,255,200,0.15) 50%, transparent 70%)' },
+  { id: 'star', nameKey: 'star', preview: 'radial-gradient(circle at 20% 30%, rgba(255,255,255,0.3) 0%, transparent 3%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.25) 0%, transparent 2%)' },
+  { id: 'lens', nameKey: 'lens', preview: 'radial-gradient(circle at 50% 20%, rgba(255,255,255,0.35) 0%, transparent 30%)' },
+  { id: 'vapor', nameKey: 'vapor', preview: 'linear-gradient(45deg, rgba(255,100,180,0.1) 0%, rgba(100,180,255,0.1) 100%)' },
+  { id: 'sunset', nameKey: 'sunset', preview: 'radial-gradient(ellipse at 80% 80%, rgba(255,150,100,0.2) 0%, transparent 50%)' },
+];
+
+const PRESETS = [
+  { nameKey: 'sunset', stops: [{color:'#FFE4D6',pos:0},{color:'#FFCBA4',pos:0.2},{color:'#FFAA85',pos:0.4},{color:'#F58B8B',pos:0.6},{color:'#C26DAD',pos:0.8},{color:'#8B6DAD',pos:1}], angle: 180, overlay: 'none' },
+  { nameKey: 'ocean', stops: [{color:'#E8F4F8',pos:0},{color:'#B8E4F0',pos:0.25},{color:'#5DC0D4',pos:0.5},{color:'#2A9DB8',pos:0.75},{color:'#1A7A98',pos:1}], angle: 135, overlay: 'none' },
+  { nameKey: 'mint', stops: [{color:'#F0FFF4',pos:0},{color:'#C6F6D5',pos:0.25},{color:'#68D391',pos:0.5},{color:'#38B2AC',pos:0.75},{color:'#2C7A7B',pos:1}], angle: 180, overlay: 'none' },
+  { nameKey: 'lavender', stops: [{color:'#FAF5FF',pos:0},{color:'#E9D8FD',pos:0.25},{color:'#B794F4',pos:0.5},{color:'#805AD5',pos:0.75},{color:'#6B46C1',pos:1}], angle: 180, overlay: 'none' },
+  { nameKey: 'peach', stops: [{color:'#FFF5F0',pos:0},{color:'#FFE4D6',pos:0.25},{color:'#FFAB91',pos:0.5},{color:'#FF8A75',pos:0.75},{color:'#E57373',pos:1}], angle: 135, overlay: 'none' },
+  { nameKey: 'aurora', stops: [{color:'#E6FFFA',pos:0},{color:'#B2F5EA',pos:0.2},{color:'#38E8D0',pos:0.4},{color:'#20C8B8',pos:0.6},{color:'#00B5A8',pos:0.8},{color:'#00897B',pos:1}], angle: 160, overlay: 'none' },
+  { nameKey: 'rose', stops: [{color:'#FFF0F5',pos:0},{color:'#FFE4EC',pos:0.2},{color:'#F8BBD9',pos:0.4},{color:'#F48FB1',pos:0.6},{color:'#EC407A',pos:0.8},{color:'#D81B60',pos:1}], angle: 135, overlay: 'none' },
+  { nameKey: 'golden', stops: [{color:'#FFFBEB',pos:0},{color:'#FEF3C7',pos:0.25},{color:'#FCD34D',pos:0.5},{color:'#FBBF24',pos:0.75},{color:'#F59E0B',pos:1}], angle: 180, overlay: 'none' },
+  { nameKey: 'sky', stops: [{color:'#EFF6FF',pos:0},{color:'#DBEAFE',pos:0.25},{color:'#93C5FD',pos:0.5},{color:'#3B82F6',pos:0.75},{color:'#2563EB',pos:1}], angle: 180, overlay: 'none' },
+  { nameKey: 'tropical', stops: [{color:'#ECFDF5',pos:0},{color:'#A7F3D0',pos:0.25},{color:'#34D399',pos:0.5},{color:'#10B981',pos:0.75},{color:'#059669',pos:1}], angle: 135, overlay: 'none' },
+  { nameKey: 'cotton', stops: [{color:'#FDF2F8',pos:0},{color:'#FCE7F3',pos:0.25},{color:'#F9A8D4',pos:0.5},{color:'#F472B6',pos:0.75},{color:'#DB2777',pos:1}], angle: 160, overlay: 'none' },
+  { nameKey: 'night', stops: [{color:'#FAF5FF',pos:0},{color:'#EDE9FE',pos:0.25},{color:'#C4B5FD',pos:0.5},{color:'#A78BFA',pos:0.75},{color:'#8B5CF6',pos:1}], angle: 180, overlay: 'none' },
+];
+
+const ROOM_ICONS = { living: '🛋️', bedroom: '🛏️', kitchen: '🍳', dining: '🍽️', bathroom: '🚿', toilet: '🚽', office: '💻', study: '📚', hallway: '🚪', balcony: '🌅', entryway: '🧥', garage: '🚗', garden: '🌿', gym: '🏋️', kids: '🧸', laundry: '🧺', storage: '📦', upload: '📤' };
+
+// 房间装饰贴纸：每房间一套 SVG path + 颜色
+const ROOM_DECOS = {
+  bathroom: [
+    { icon: '🪩', sz: [26,52] },
+    { icon: '🚿', sz: [32,64] },
+    { icon: '🫁', sz: [40,80] },
+    { icon: '🦼', sz: [24,48] },
+    { icon: '🪞', sz: [30,60] },
+    { icon: '🧺', sz: [28,56] },
+    { icon: '🩷', sz: [20,40] },
+    { icon: '🦽', sz: [22,44] },
+    { icon: '🪮', sz: [18,36] },
+    { icon: '🧻', sz: [26,52] },
+    { icon: '🶻', sz: [36,72] },
+    { icon: '🧇', sz: [16,32] },
+    { icon: '🧹', sz: [24,48] },
+    { icon: '🪣', sz: [28,56] },
+    { icon: '🧋', sz: [26,52] },
+    { icon: '🚱', sz: [22,44] },
+    { icon: '🩵', sz: [24,48] },
+    { icon: '🧊', sz: [18,36] },
+    { icon: '🪛', sz: [20,40] },
+    { icon: '🩹', sz: [22,44] },
+    { icon: '🧼', sz: [26,52] },
+    { icon: '🩺', sz: [24,48] },
+    { icon: '🪮', sz: [18,36] },
+    { icon: '🧻', sz: [26,52] },
+    { icon: '🶻', sz: [34,68] },
+    { icon: '🪞', sz: [32,64] },
+    { icon: '🧺', sz: [26,52] },
+    { icon: '🧹', sz: [24,48] },
+    { icon: '🪣', sz: [28,56] },
+    { icon: '🧋', sz: [30,60] },
+    { icon: '🚱', sz: [22,44] },
+    { icon: '🩵', sz: [24,48] },
+    { icon: '🧊', sz: [18,36] },
+    { icon: '🪛', sz: [20,40] },
+    { icon: '🩹', sz: [22,44] },
+    { icon: '🧼', sz: [26,52] },
+    { icon: '🩺', sz: [24,48] },
+    { icon: '🪮', sz: [18,36] },
+    { icon: '🧻', sz: [26,52] },
+    { icon: '🶻', sz: [34,68] },
+    { icon: '🪞', sz: [32,64] },
+    { icon: '🧺', sz: [26,52] },
+    { icon: '🧹', sz: [24,48] },
+    { icon: '🪣', sz: [28,56] },
+    { icon: '🧋', sz: [30,60] },
+    { icon: '🚱', sz: [22,44] },
+    { icon: '🩵', sz: [24,48] },
+    { icon: '🧊', sz: [18,36] },
+    { icon: '🪛', sz: [20,40] },
+    { icon: '🩹', sz: [22,44] },
+    { icon: '🧼', sz: [26,52] },
+    { icon: '🩺', sz: [24,48] },
+    { icon: '🧹', sz: [24,48] },
+    { icon: '🦽', sz: [22,44] },
+  ],
+  bedroom: [
+    { icon: '🪑', sz: [38,76] },
+    { icon: '🛌', sz: [36,72] },
+    { icon: '🌙', sz: [28,56] },
+    { icon: '⭐', sz: [22,44] },
+    { icon: '🧸', sz: [30,60] },
+    { icon: '💡', sz: [24,48] },
+    { icon: '💢', sz: [28,56] },
+    { icon: '🌸', sz: [26,52] },
+    { icon: '📚', sz: [28,56] },
+    { icon: '📕', sz: [24,48] },
+    { icon: '📖', sz: [26,52] },
+    { icon: '📓', sz: [22,44] },
+    { icon: '📔', sz: [24,48] },
+    { icon: '🔖', sz: [18,36] },
+    { icon: '🔗', sz: [20,40] },
+    { icon: '📰', sz: [26,52] },
+    { icon: '📝', sz: [24,48] },
+    { icon: '📤', sz: [26,52] },
+    { icon: '📥', sz: [24,48] },
+    { icon: '🕠', sz: [20,40] },
+    { icon: '🕡', sz: [22,44] },
+    { icon: '🕢', sz: [24,48] },
+    { icon: '🕣', sz: [26,52] },
+    { icon: '🕤', sz: [28,56] },
+    { icon: '🕥', sz: [30,60] },
+    { icon: '🕦', sz: [32,64] },
+    { icon: '🕧', sz: [34,68] },
+    { icon: '🕐', sz: [22,44] },
+    { icon: '🕑', sz: [24,48] },
+    { icon: '🕒', sz: [26,52] },
+    { icon: '🕓', sz: [28,56] },
+    { icon: '🕔', sz: [30,60] },
+    { icon: '🕕', sz: [32,64] },
+    { icon: '🕖', sz: [22,44] },
+    { icon: '🕗', sz: [24,48] },
+    { icon: '🕘', sz: [26,52] },
+    { icon: '🕙', sz: [28,56] },
+    { icon: '🕚', sz: [30,60] },
+    { icon: '🕛', sz: [32,64] },
+    { icon: '💣', sz: [22,44] },
+    { icon: '💤', sz: [24,48] },
+    { icon: '🌟', sz: [20,40] },
+    { icon: '🧩', sz: [26,52] },
+    { icon: '📧', sz: [22,44] },
+    { icon: '📆', sz: [24,48] },
+    { icon: '📅', sz: [26,52] },
+    { icon: '📁', sz: [28,56] },
+    { icon: '📂', sz: [20,40] },
+    { icon: '📃', sz: [22,44] },
+    { icon: '📄', sz: [24,48] },
+    { icon: '📏', sz: [20,40] },
+    { icon: '📌', sz: [22,44] },
+    { icon: '🔖', sz: [18,36] },
+    { icon: '🔗', sz: [20,40] },
+    { icon: '🌙', sz: [28,56] },
+    { icon: '💡', sz: [24,48] },
+    { icon: '🧸', sz: [30,60] },
+    { icon: '⭐', sz: [22,44] },
+    { icon: '🔖', sz: [18,36] },
+    { icon: '📣', sz: [20,40] },
+  ],
+  living: [
+    { icon: '🪑', sz: [40,80] },
+    { icon: '🛋', sz: [36,72] },
+    { icon: '💻', sz: [30,60] },
+    { icon: '💺', sz: [32,64] },
+    { icon: '📺', sz: [34,68] },
+    { icon: '📻', sz: [30,60] },
+    { icon: '🔊', sz: [26,52] },
+    { icon: '🎧', sz: [28,56] },
+    { icon: '🎬', sz: [32,64] },
+    { icon: '🎮', sz: [26,52] },
+    { icon: '🎲', sz: [28,56] },
+    { icon: '🎳', sz: [24,48] },
+    { icon: '🎴', sz: [22,44] },
+    { icon: '🎵', sz: [26,52] },
+    { icon: '🎶', sz: [28,56] },
+    { icon: '🎷', sz: [30,60] },
+    { icon: '🎸', sz: [32,64] },
+    { icon: '🎺', sz: [28,56] },
+    { icon: '🎻', sz: [24,48] },
+    { icon: '🎼', sz: [30,60] },
+    { icon: '🎾', sz: [28,56] },
+    { icon: '🎿', sz: [32,64] },
+    { icon: '🏀', sz: [30,60] },
+    { icon: '🏁', sz: [34,68] },
+    { icon: '🏂', sz: [26,52] },
+    { icon: '🏃', sz: [28,56] },
+    { icon: '🏄', sz: [30,60] },
+    { icon: '🏆', sz: [34,68] },
+    { icon: '🏈', sz: [28,56] },
+    { icon: '🏉', sz: [30,60] },
+    { icon: '🎯', sz: [28,56] },
+    { icon: '🎰', sz: [24,48] },
+    { icon: '🎭', sz: [30,60] },
+    { icon: '🔮', sz: [24,48] },
+    { icon: '🔯', sz: [26,52] },
+    { icon: '🎨', sz: [30,60] },
+    { icon: '🔋', sz: [26,52] },
+    { icon: '🔇', sz: [22,44] },
+    { icon: '🔉', sz: [24,48] },
+    { icon: '🕯', sz: [26,52] },
+    { icon: '📣', sz: [24,48] },
+    { icon: '📶', sz: [28,56] },
+    { icon: '📨', sz: [26,52] },
+    { icon: '📩', sz: [28,56] },
+    { icon: '📪', sz: [30,60] },
+    { icon: '📫', sz: [32,64] },
+    { icon: '📬', sz: [34,68] },
+    { icon: '📭', sz: [22,44] },
+    { icon: '📮', sz: [24,48] },
+    { icon: '📯', sz: [26,52] },
+    { icon: '📰', sz: [28,56] },
+    { icon: '📱', sz: [30,60] },
+    { icon: '📲', sz: [32,64] },
+    { icon: '📳', sz: [20,40] },
+    { icon: '📴', sz: [22,44] },
+    { icon: '🎩', sz: [28,56] },
+    { icon: '🔌', sz: [26,52] },
+  ],
+  kitchen: [
+    { icon: '🍳', sz: [30,60] },
+    { icon: '🥞', sz: [28,56] },
+    { icon: '🍞', sz: [26,52] },
+    { icon: '🧁', sz: [32,64] },
+    { icon: '🧂', sz: [34,68] },
+    { icon: '🧃', sz: [24,48] },
+    { icon: '🧄', sz: [28,56] },
+    { icon: '🧅', sz: [30,60] },
+    { icon: '🧆', sz: [26,52] },
+    { icon: '🧇', sz: [24,48] },
+    { icon: '🧈', sz: [28,56] },
+    { icon: '🧉', sz: [22,44] },
+    { icon: '🧊', sz: [26,52] },
+    { icon: '🍝', sz: [24,48] },
+    { icon: '🍜', sz: [28,56] },
+    { icon: '🍛', sz: [30,60] },
+    { icon: '🍚', sz: [26,52] },
+    { icon: '🍙', sz: [28,56] },
+    { icon: '🍟', sz: [30,60] },
+    { icon: '🍲', sz: [26,52] },
+    { icon: '🥕', sz: [24,48] },
+    { icon: '🥖', sz: [28,56] },
+    { icon: '🥗', sz: [26,52] },
+    { icon: '🥘', sz: [30,60] },
+    { icon: '🥓', sz: [24,48] },
+    { icon: '🥜', sz: [28,56] },
+    { icon: '🥛', sz: [26,52] },
+    { icon: '𒘕', sz: [22,44] },
+    { icon: '🍵', sz: [24,48] },
+    { icon: '🫖', sz: [26,52] },
+    { icon: '🥤', sz: [22,44] },
+    { icon: '🧅', sz: [30,60] },
+    { icon: '🧃', sz: [24,48] },
+    { icon: '🥩', sz: [28,56] },
+    { icon: '🥪', sz: [26,52] },
+    { icon: '🥞', sz: [28,56] },
+    { icon: '🌭', sz: [30,60] },
+    { icon: '🍔', sz: [32,64] },
+    { icon: '🍟', sz: [26,52] },
+    { icon: '🍚', sz: [28,56] },
+    { icon: '🍛', sz: [30,60] },
+    { icon: '🍜', sz: [26,52] },
+    { icon: '🍝', sz: [24,48] },
+    { icon: '🍞', sz: [28,56] },
+    { icon: '🥫', sz: [30,60] },
+    { icon: '🍲', sz: [26,52] },
+    { icon: '🥓', sz: [24,48] },
+    { icon: '🥛', sz: [26,52] },
+    { icon: '𒘕', sz: [22,44] },
+    { icon: '🍵', sz: [24,48] },
+    { icon: '🫖', sz: [26,52] },
+    { icon: '🥤', sz: [22,44] },
+    { icon: '🥜', sz: [28,56] },
+    { icon: '🧅', sz: [30,60] },
+    { icon: '🍳', sz: [30,60] },
+    { icon: '🧁', sz: [32,64] },
+    { icon: '🧂', sz: [34,68] },
+    { icon: '🥪', sz: [26,52] },
+    { icon: '🥩', sz: [28,56] },
+    { icon: '🧄', sz: [28,56] },
+  ],
+};
+
+
+;
+
+function initPresets() {
+  const grid = document.getElementById('presets-grid');
+  PRESETS.forEach((p, i) => {
+    const name = I18N[lang].presetNames[p.nameKey] || p.nameKey;
+    const btn = document.createElement('button');
+    btn.className = 'preset-btn';
+    btn.dataset.index = i;
+    const grad = `linear-gradient(${p.angle}deg, ${p.stops.map(s=>s.color+' '+(s.pos*100)+'%').join(',')})`;
+    btn.style.background = grad;
+    btn.innerHTML = '<span class="preset-label">'+name+'</span>';
+    btn.onclick = () => applyPreset(p, btn);
+    grid.appendChild(btn);
+  });
+}
+
+function initOverlays() {
+  const grid = document.getElementById('overlay-grid');
+  grid.innerHTML = '';
+  OVERLAYS.forEach(o => {
+    const btn = document.createElement('button');
+    btn.className = 'overlay-btn' + (o.id === state.overlay ? ' active' : '');
+    btn.dataset.overlay = o.id;
+    btn.innerHTML = '<div class="ov-preview" style="background:'+o.preview+'"></div>' + t(o.nameKey);
+    btn.onclick = () => selectOverlay(o.id);
+    grid.appendChild(btn);
+  });
+}
+
+function selectOverlay(id) {
+  state.overlay = id;
+  if (id === 'star') starSeed = Math.random() * 9999;
+  document.querySelectorAll('.overlay-btn').forEach(b => b.classList.toggle('active', b.dataset.overlay === id));
+  render();
+}
+
+function applyPreset(p, btn) {
+  state.stops = p.stops.map(s => ({...s}));
+  state.angle = p.angle;
+  if (p.overlay) selectOverlay(p.overlay);
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.dir-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.angle) === state.angle));
+  renderStopsUI();
+  render();
+}
+
+function renderStopsUI() {
+  const container = document.getElementById('color-stops');
+  container.innerHTML = '';
+  state.stops.forEach((stop, i) => {
+    const row = document.createElement('div');
+    row.className = 'color-stop-row';
+    row.innerHTML = '<div class="color-swatch" draggable="true" style="background:'+stop.color+'"><input type="color" value="'+stop.color+'" oninput="updateStopColor('+i+', this.value)"></div><div class="stop-info"><div class="stop-hex"><span>'+stop.color.toUpperCase()+'</span><span class="stop-pct">'+Math.round(stop.pos*100)+'%</span></div><div class="stop-pos"><input type="range" class="stop-pos-slider" min="0" max="100" value="'+Math.round(stop.pos*100)+'" oninput="updateStopPos('+i+', this.value)"></div></div>'+(state.stops.length > 2 ? '<button class="stop-remove" onclick="removeStop('+i+')">×</button>' : '');
+    container.appendChild(row);
+  });
+  document.getElementById('info-stops').textContent = state.stops.length + ' 个节点';
+  renderCompactBar();
+}
+
+function renderCompactBar() {
+  const bar = document.getElementById('color-stops-compact');
+  if (!bar) return;
+  const sorted = [...state.stops].sort((a,b) => a.pos - b.pos);
+  const stops = sorted.map(s => s.color + ' ' + Math.round(s.pos * 100) + '%').join(', ');
+  bar.style.background = 'linear-gradient(to right, ' + stops + ')';
+}
+
+function updateStopColor(i, val) { state.stops[i].color = val; renderStopsUI(); render(); }
+function updateStopPos(i, val) {
+  const pos = parseInt(val) / 100;
+  state.stops[i].pos = pos;
+  // 只更新当前节点的滑块和百分比文本，不重建整个列表
+  const rows = document.querySelectorAll('.color-stop-row');
+  if (rows[i]) {
+    const slider = rows[i].querySelector('.stop-pos-slider');
+    const pct = rows[i].querySelector('.stop-pct');
+    if (slider) slider.value = Math.round(pos * 100);
+    if (pct) pct.textContent = Math.round(pos * 100) + '%';
+  }
+  render();
+}
+function removeStop(i) { state.stops.splice(i, 1); state.stops.sort((a,b) => a.pos - b.pos); renderStopsUI(); render(); }
+
+// 颜色节点拖动排序
+let dragIndex = null;
+document.getElementById('color-stops').addEventListener('dragstart', e => {
+  const swatch = e.target.closest('.color-swatch');
+  if (!swatch) return;
+  const rows = [...swatch.closest('#color-stops').children];
+  dragIndex = rows.indexOf(swatch.closest('.color-stop-row'));
+  swatch.classList.add('dragging');
+});
+document.getElementById('color-stops').addEventListener('dragend', e => {
+  const swatch = e.target.closest('.color-swatch');
+  if (swatch) swatch.classList.remove('dragging');
+  dragIndex = null;
+});
+document.getElementById('color-stops').addEventListener('dragover', e => {
+  e.preventDefault();
+  const row = e.target.closest('.color-stop-row');
+  if (!row || dragIndex === null) return;
+  const rows = [...row.parentElement.children];
+  const overIndex = rows.indexOf(row);
+  if (dragIndex === overIndex) return;
+  const [item] = state.stops.splice(dragIndex, 1);
+  state.stops.splice(overIndex, 0, item);
+  dragIndex = overIndex;
+  renderStopsUI();
+});
+
+document.getElementById('add-stop-btn').onclick = () => {
+  const sorted = [...state.stops].sort((a,b) => a.pos - b.pos);
+  let bestGap = 0, insertPos = 0.5, insertColor = '#2a2a3a';
+  for (let i = 0; i < sorted.length - 1; i++) {
+    const gap = sorted[i+1].pos - sorted[i].pos;
+    if (gap > bestGap) { bestGap = gap; insertPos = (sorted[i].pos + sorted[i+1].pos) / 2; insertColor = blendColors(sorted[i].color, sorted[i+1].color); }
+  }
+  state.stops.push({ color: insertColor, pos: insertPos });
+  renderStopsUI();
+  render();
+};
+
+function blendColors(c1, c2) {
+  const hex = s => parseInt(s, 16);
+  const r1 = hex(c1.slice(1,3)), g1 = hex(c1.slice(3,5)), b1 = hex(c1.slice(5,7));
+  const r2 = hex(c2.slice(1,3)), g2 = hex(c2.slice(3,5)), b2 = hex(c2.slice(5,7));
+  return '#' + Math.round((r1+r2)/2).toString(16).padStart(2,'0') + Math.round((g1+g2)/2).toString(16).padStart(2,'0') + Math.round((b1+b2)/2).toString(16).padStart(2,'0');
+}
+
+document.getElementById('type-tabs').addEventListener('click', e => {
+  const btn = e.target.closest('.type-tab');
+  if (!btn) return;
+  state.gradientType = btn.dataset.type;
+  document.querySelectorAll('.type-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('direction-section').style.display = state.gradientType === 'linear' ? '' : 'none';
+  document.getElementById('info-type').textContent = t(state.gradientType);
+  render();
+});
+
+document.getElementById('direction-grid').addEventListener('click', e => {
+  const btn = e.target.closest('.dir-btn');
+  if (!btn) return;
+  state.angle = parseInt(btn.dataset.angle);
+  document.querySelectorAll('.dir-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+});
+
+document.getElementById('room-grid').addEventListener('click', e => {
+  const btn = e.target.closest('.room-btn');
+  if (!btn) return;
+  if (btn.id === 'upload-btn') return; // 上传按钮单独处理
+  state.room = btn.dataset.room;
+  document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+});
+
+// 上传图标处理
+document.getElementById('upload-btn').addEventListener('click', () => {
+  document.getElementById('icon-upload').click();
+});
+
+document.getElementById('icon-upload').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = event => {
+    const img = new Image();
+    img.onload = () => {
+      state.customIcon = img;
+      state.room = 'upload';
+      document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('upload-btn').classList.add('active');
+      render();
+    };
+    img.src = event.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+// 颜色节点折叠控制
+(function() {
+  const toggle = document.getElementById('color-stops-toggle');
+  const body = document.getElementById('color-stops-body');
+  const compact = document.getElementById('color-stops-compact');
+  if (!toggle || !body || !compact) return;
+  const saved = localStorage.getItem('colorStopsCollapsed');
+  const collapsed = saved === 'true';
+  function applyCollapse(c) {
+    toggle.dataset.collapsed = c;
+    if (c) {
+      body.classList.add('collapsed');
+      body.style.maxHeight = body.scrollHeight + 'px';
+      requestAnimationFrame(() => { body.style.maxHeight = '0px'; });
+      compact.style.display = 'block';
+    } else {
+      body.classList.remove('collapsed');
+      body.style.maxHeight = body.scrollHeight + 'px';
+      compact.style.display = 'none';
+      setTimeout(() => { body.style.maxHeight = 'none'; }, 300);
+    }
+    localStorage.setItem('colorStopsCollapsed', c);
+  }
+  toggle.addEventListener('click', () => applyCollapse(toggle.dataset.collapsed !== 'true'));
+  applyCollapse(collapsed);
+})();
+
+// 同步切换按钮状态
+document.getElementById('toggle-vignette').classList.toggle('on', state.effects.vignette);
+document.getElementById('toggle-icon').classList.toggle('on', state.effects.icon);
+document.getElementById('toggle-deco').classList.toggle('on', state.effects.deco);
+document.getElementById('deco-settings').style.display = state.effects.deco ? '' : 'none';
+document.getElementById('icon-settings').style.display = state.effects.icon ? '' : 'none';
+
+document.getElementById('size-selector').addEventListener('click', e => {
+  const btn = e.target.closest('.size-btn');
+  if (!btn) return;
+  state.canvasW = parseInt(btn.dataset.w);
+  state.canvasH = parseInt(btn.dataset.h);
+  document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('info-size').textContent = state.canvasW + ' × ' + state.canvasH;
+  render();
+});
+
+// 缩放控制
+const ZOOM_STOPS = [0.25, 0.5, 0.75, 1, 1.5, 2];
+const zoomSlider = document.getElementById('zoom-slider');
+const zoomPct = document.getElementById('zoom-pct');
+zoomSlider.addEventListener('input', () => {
+  if (_syncingZoom) return;
+  state.zoomScale = ZOOM_STOPS[parseInt(zoomSlider.value)];
+  zoomPct.textContent = Math.round(state.zoomScale * 100) + '%';
+  render();
+});
+
+    // 装饰贴纸控制
+    document.getElementById('slider-deco-count').oninput = function() {
+      var v = parseInt(this.value); document.getElementById('val-deco-count').textContent = v; state.decoCount = v; render();
+    };
+    document.getElementById('slider-deco-size-min').oninput = function() {
+      var v = parseInt(this.value);
+      var mx = document.getElementById('slider-deco-size-max');
+      if (v > parseInt(mx.value)) { v = parseInt(mx.value); this.value = v; }
+      state.decoSizeMin = v;
+      document.getElementById('val-deco-size-min').textContent = v + 'px';
+      render();
+    };
+    document.getElementById('slider-deco-size-max').oninput = function() {
+      var v = parseInt(this.value);
+      var mn = document.getElementById('slider-deco-size-min');
+      if (v < parseInt(mn.value)) { v = parseInt(mn.value); this.value = v; }
+      state.decoSizeMax = v;
+      document.getElementById('val-deco-size-max').textContent = v + 'px';
+      render();
+    };
+    document.getElementById('slider-deco-opacity').oninput = function() {
+      var v = parseInt(this.value); document.getElementById('val-deco-opacity').textContent = v + '%'; state.decoOpacity = v / 100; render();
+    };
+    // Blend mode buttons
+    window.setBlendMode = function(btn) {
+      document.querySelectorAll('.blend-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.decoBlend = btn.dataset.value;
+      render();
+    };
+
+
+function toggleEffect(name) {
+  state.effects[name] = !state.effects[name];
+  document.getElementById('toggle-'+name).classList.toggle('on', state.effects[name]);
+  if (name === 'icon') document.getElementById('icon-settings').style.display = state.effects.icon ? '' : 'none';
+  if (name === 'deco') document.getElementById('deco-settings').style.display = state.effects.deco ? '' : 'none';
+  render();
+}
+
+const canvas = document.getElementById('preview-canvas');
+const ctx = canvas.getContext('2d');
+
+function render() {
+  const W = state.canvasW, H = state.canvasH;
+  canvas.width = W;
+  canvas.height = H;
+  const wrapper = canvas.parentElement;
+  const maxW = wrapper.clientWidth - 48, maxH = wrapper.clientHeight - 48;
+  const scale = Math.min(maxW / W, maxH / H, 1) * state.zoomScale;
+  canvas.style.width = Math.round(W * scale) + 'px';
+  canvas.style.height = Math.round(H * scale) + 'px';
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, W, H);
+  if (state.gradientType === 'linear') drawLinear(W, H);
+  else if (state.gradientType === 'radial') drawRadial(W, H);
+  else drawMesh(W, H);
+  drawOverlayEffect(W, H);
+  if (state.effects.bloom) drawBloom(W, H);
+  if (state.effects.noise) drawNoise(W, H);
+  if (state.effects.vignette) drawVignette(W, H);
+  if (state.effects.deco) drawRoomDeco(W, H);
+  if (state.effects.icon) drawRoomIcon(W, H);
+}
+
+function angleToVector(deg) { const rad = (deg - 90) * Math.PI / 180; return { x: Math.cos(rad), y: Math.sin(rad) }; }
+
+function drawLinear(W, H) {
+  const v = angleToVector(state.angle);
+  const cx = W / 2, cy = H / 2;
+  const len = Math.sqrt(W*W + H*H) / 2;
+  const x0 = cx - v.x * len, y0 = cy - v.y * len;
+  const x1 = cx + v.x * len, y1 = cy + v.y * len;
+  const grad = ctx.createLinearGradient(x0, y0, x1, y1);
+  const sorted = [...state.stops].sort((a,b) => a.pos - b.pos);
+  sorted.forEach(s => grad.addColorStop(s.pos, s.color));
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+}
+
+function drawRadial(W, H) {
+  const cx = W * 0.5, cy = H * 0.35;
+  const r = Math.max(W, H) * 0.85;
+  const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+  const sorted = [...state.stops].sort((a,b) => a.pos - b.pos);
+  sorted.forEach(s => grad.addColorStop(s.pos, s.color));
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+}
+
+function drawMesh(W, H) {
+  ctx.fillStyle = state.stops[0]?.color || '#000';
+  ctx.fillRect(0, 0, W, H);
+  const points = [
+    { x: 0.15, y: 0.15, color: state.stops[0]?.color || '#000' },
+    { x: 0.85, y: 0.1, color: state.stops[1]?.color || '#333' },
+    { x: 0.1, y: 0.75, color: state.stops[2]?.color || '#666' },
+    { x: 0.9, y: 0.8, color: state.stops[Math.min(3, state.stops.length-1)]?.color || '#444' },
+    { x: 0.5, y: 0.45, color: state.stops[Math.floor(state.stops.length/2)]?.color || '#555' },
+  ];
+  ctx.globalCompositeOperation = 'screen';
+  points.forEach(p => {
+    const r = Math.max(W, H) * 0.75;
+    const grad = ctx.createRadialGradient(p.x*W, p.y*H, 0, p.x*W, p.y*H, r);
+    grad.addColorStop(0, p.color + 'aa');
+    grad.addColorStop(0.4, p.color + '66');
+    grad.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+  });
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+function drawOverlayEffect(W, H) {
+  if (state.overlay === 'lightBeam') {
+    const angle = state.angle * Math.PI / 180;
+    const cx = W * 0.5, cy = H * 0.5;
+    for (let i = 0; i < 3; i++) {
+      const offset = (i - 1) * W * 0.2;
+      const x1 = cx - Math.cos(angle) * W + offset, y1 = cy - Math.sin(angle) * H;
+      const x2 = cx + Math.cos(angle) * W + offset, y2 = cy + Math.sin(angle) * H;
+      const grad = ctx.createLinearGradient(x1, y1, x2, y2);
+      grad.addColorStop(0, 'transparent');
+      grad.addColorStop(0.4, 'rgba(255,255,255,0.08)');
+      grad.addColorStop(0.5, 'rgba(255,255,255,0.15)');
+      grad.addColorStop(0.6, 'rgba(255,255,255,0.08)');
+      grad.addColorStop(1, 'transparent');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, W, H);
+    }
+  } else if (state.overlay === 'lightOrb') {
+    // 大面积柔光球 - 居中偏上，带暖色调
+    const cx = W * 0.5, cy = H * 0.35, r = Math.max(W, H) * 0.85;
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grad.addColorStop(0, 'rgba(255,250,240,0.35)');
+    grad.addColorStop(0.1, 'rgba(255,245,230,0.25)');
+    grad.addColorStop(0.25, 'rgba(255,240,220,0.15)');
+    grad.addColorStop(0.4, 'rgba(255,235,215,0.08)');
+    grad.addColorStop(0.6, 'rgba(255,230,210,0.03)');
+    grad.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+  } else if (state.overlay === 'dualOrb') {
+    const cx1 = W * 0.3, cy1 = H * 0.35, r1 = Math.max(W, H) * 0.5;
+    const grad1 = ctx.createRadialGradient(cx1, cy1, 0, cx1, cy1, r1);
+    grad1.addColorStop(0, 'rgba(180,120,255,0.2)');
+    grad1.addColorStop(0.2, 'rgba(160,100,240,0.1)');
+    grad1.addColorStop(0.5, 'rgba(100,80,200,0.03)');
+    grad1.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad1;
+    ctx.fillRect(0, 0, W, H);
+    const cx2 = W * 0.7, cy2 = H * 0.65, r2 = Math.max(W, H) * 0.45;
+    const grad2 = ctx.createRadialGradient(cx2, cy2, 0, cx2, cy2, r2);
+    grad2.addColorStop(0, 'rgba(100,200,255,0.18)');
+    grad2.addColorStop(0.2, 'rgba(80,180,240,0.08)');
+    grad2.addColorStop(0.5, 'rgba(60,150,220,0.02)');
+    grad2.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad2;
+    ctx.fillRect(0, 0, W, H);
+  } else if (state.overlay === 'aurora') {
+    for (let i = 0; i < 5; i++) {
+      const yBase = H * (0.25 + i * 0.1);
+      const alpha = 0.08 - i * 0.012;
+      ctx.beginPath();
+      ctx.moveTo(0, yBase);
+      for (let x = 0; x <= W; x += 10) ctx.lineTo(x, yBase + Math.sin((x / W) * Math.PI * 3 + i) * H * 0.03);
+      ctx.lineTo(W, yBase + H * 0.15);
+      ctx.lineTo(0, yBase + H * 0.15);
+      ctx.closePath();
+      const grad = ctx.createLinearGradient(0, yBase, 0, yBase + H * 0.15);
+      grad.addColorStop(0, 'rgba(100,255,200,'+alpha+')');
+      grad.addColorStop(0.5, 'rgba(80,200,180,'+(alpha*0.5)+')');
+      grad.addColorStop(1, 'transparent');
+      ctx.fillStyle = grad;
+      ctx.fill();
+    }
+  } else if (state.overlay === 'star') {
+    const rng = s => { s = Math.sin(s) * 43758.5453; return s - Math.floor(s); };
+    const t = Date.now() * 0.001;
+    const seed = starSeed;
+    const dimStars = [], brightStars = [];
+    for (let i = 0; i < 55; i++) {
+      const x = rng(i * 7.31 + seed * 0.37 + 1.7), y = rng(i * 3.17 + seed * 0.53 + 0.3), r = rng(i * 5.93 + seed * 0.71 + 2.1);
+      const twinkle = 0.7 + 0.3 * Math.sin(t * (1.2 + rng(i * 2.71) * 1.8) + rng(i * 4.13) * 6.28);
+      if (r < 0.7) dimStars.push({x, y, a: (0.2 + r * 0.4) * twinkle, sz: 0.8 + r * 1.2});
+      else brightStars.push({x, y, a: (0.5 + (r - 0.7) * 1.5) * twinkle, sz: 1.5 + (r - 0.7) * 3});
+    }
+    dimStars.forEach(s => {
+      const px = s.x * W, py = s.y * H, sz = s.sz;
+      ctx.globalAlpha = s.a;
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(px, py, sz, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    brightStars.forEach(s => {
+      const px = s.x * W, py = s.y * H, sz = s.sz;
+      const gr = ctx.createRadialGradient(px, py, 0, px, py, sz * 6);
+      gr.addColorStop(0, 'rgba(255,255,255,' + s.a + ')');
+      gr.addColorStop(0.15, 'rgba(200,220,255,' + (s.a * 0.5) + ')');
+      gr.addColorStop(1, 'transparent');
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = gr;
+      ctx.fillRect(px - sz * 6, py - sz * 6, sz * 12, sz * 12);
+      ctx.globalAlpha = s.a * 0.7;
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 0.6;
+      const fl = sz * 5;
+      ctx.beginPath();
+      ctx.moveTo(px - fl, py); ctx.lineTo(px + fl, py);
+      ctx.moveTo(px, py - fl); ctx.lineTo(px, py + fl);
+      ctx.stroke();
+      ctx.lineWidth = 0.3;
+      ctx.beginPath();
+      ctx.moveTo(px - fl * 0.7, py - fl * 0.7); ctx.lineTo(px + fl * 0.7, py + fl * 0.7);
+      ctx.moveTo(px + fl * 0.7, py - fl * 0.7); ctx.lineTo(px - fl * 0.7, py + fl * 0.7);
+      ctx.stroke();
+    });
+    ctx.globalAlpha = 1;
+  } else if (state.overlay === 'lens') {
+    const cx = W * 0.5, cy = H * 0.15, r = Math.min(W, H) * 0.4;
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grad.addColorStop(0, 'rgba(255,255,255,0.3)');
+    grad.addColorStop(0.2, 'rgba(255,255,255,0.15)');
+    grad.addColorStop(0.5, 'rgba(255,255,255,0.05)');
+    grad.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+    ctx.save();
+    ctx.globalAlpha = 0.1;
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(cx - r, cy);
+    ctx.lineTo(cx + r, cy);
+    ctx.moveTo(cx, cy - r);
+    ctx.lineTo(cx, cy + r);
+    ctx.stroke();
+    ctx.restore();
+  } else if (state.overlay === 'vapor') {
+    const grad = ctx.createLinearGradient(0, 0, W, H);
+    grad.addColorStop(0, 'rgba(255,100,180,0.08)');
+    grad.addColorStop(0.3, 'rgba(200,100,255,0.05)');
+    grad.addColorStop(0.6, 'rgba(100,200,255,0.06)');
+    grad.addColorStop(1, 'rgba(255,150,100,0.08)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+    ctx.save();
+    ctx.globalAlpha = 0.03;
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 1;
+    for (let y = 0; y < H; y += 4) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+    ctx.restore();
+  } else if (state.overlay === 'sunset') {
+    const cx = W * 0.8, cy = H * 0.85, r = Math.max(W, H) * 0.7;
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grad.addColorStop(0, 'rgba(255,180,100,0.2)');
+    grad.addColorStop(0.3, 'rgba(255,140,80,0.1)');
+    grad.addColorStop(0.6, 'rgba(255,100,60,0.04)');
+    grad.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+  }
+}
+
+function drawNoise(W, H) {
+  const intensity = parseFloat(document.getElementById('slider-noise').value);
+  const imageData = ctx.getImageData(0, 0, W, H);
+  const data = imageData.data;
+  const step = 2;
+  for (let i = 0; i < data.length; i += 4 * step) {
+    const n = (Math.random() - 0.5) * intensity * 255;
+    for (let j = 0; j < 3; j++) data[i + j] = Math.max(0, Math.min(255, data[i + j] + n));
+  }
+  ctx.putImageData(imageData, 0, 0);
+}
+
+function drawVignette(W, H) {
+  const strength = parseFloat(document.getElementById('slider-vignette').value);
+  const grad = ctx.createRadialGradient(W/2, H/2, Math.min(W,H)*0.2, W/2, H/2, Math.max(W,H)*0.72);
+  grad.addColorStop(0, 'rgba(0,0,0,0)');
+  grad.addColorStop(0.5, 'rgba(0,0,0,'+(strength*0.3)+')');
+  grad.addColorStop(1, 'rgba(0,0,0,'+strength+')');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+}
+
+function drawBloom(W, H) {
+  // 顶部多彩柔光晕 - 更强更明显
+  const cx = W * 0.5, cy = H * 0.12, r = Math.max(W, H) * 0.6;
+  const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+  grad.addColorStop(0, 'rgba(255,240,220,0.28)');
+  grad.addColorStop(0.15, 'rgba(255,210,180,0.18)');
+  grad.addColorStop(0.4, 'rgba(255,190,150,0.08)');
+  grad.addColorStop(0.7, 'rgba(255,170,130,0.03)');
+  grad.addColorStop(1, 'rgba(255,150,110,0)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+  // 底部补光
+  const grad2 = ctx.createRadialGradient(cx, H * 0.92, 0, cx, H * 0.92, r * 0.6);
+  grad2.addColorStop(0, 'rgba(200,210,255,0.12)');
+  grad2.addColorStop(0.5, 'rgba(180,200,255,0.05)');
+  grad2.addColorStop(1, 'rgba(160,190,255,0)');
+  ctx.fillStyle = grad2;
+  ctx.fillRect(0, 0, W, H);
+  // 边缘高光环绕
+  const grad3 = ctx.createRadialGradient(W * 0.5, H * 0.5, Math.min(W,H)*0.3, W * 0.5, H * 0.5, Math.max(W,H)*0.75);
+  grad3.addColorStop(0, 'rgba(255,255,255,0)');
+  grad3.addColorStop(0.7, 'rgba(255,255,255,0.02)');
+  grad3.addColorStop(1, 'rgba(255,255,255,0.06)');
+  ctx.fillStyle = grad3;
+  ctx.fillRect(0, 0, W, H);
+}
+
+function drawRoomIcon(W, H) {
+  const size = Math.min(W, H) * (parseInt(document.getElementById('slider-icon-size').value) / 100);
+  const x = W * (parseInt(document.getElementById('slider-icon-x').value) / 100);
+  const y = H * (parseInt(document.getElementById('slider-icon-y').value) / 100);
+  const opacity = parseInt(document.getElementById('slider-icon-opacity').value) / 100;
+  
+  ctx.save();
+  ctx.globalAlpha = opacity;
+  
+  // 上传的自定义图片
+  if (state.room === 'upload' && state.customIcon) {
+    const imgSize = size * 1.5;
+    ctx.drawImage(state.customIcon, x - imgSize/2, y - imgSize/2, imgSize, imgSize);
+  } else {
+    // Emoji 图标
+    const icon = ROOM_ICONS[state.room] || '✨';
+    ctx.font = size + 'px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(icon, x, y);
+  }
+  ctx.restore();
+}
+
+// ── 房间装饰贴纸 ──
+function drawRoomDeco(W, H) {
+  const room = state.room;
+  const items = ROOM_DECOS[room] || ROOM_DECOS['living'];
+  const count = Math.min(state.decoCount, items.length);
+  const blend = state.decoBlend || 'screen';
+  const opacity = state.decoOpacity;
+  const sMin = state.decoSizeMin;
+  const sMax = state.decoSizeMax;
+  const seed = room.charCodeAt(0) * 17 + room.length * 31;
+
+  // 用 seeded RNG 均匀分布全画布
+  const rng = (n) => { const x = Math.sin(n + seed) * 43758.5453; return x - Math.floor(x); };
+
+  ctx.save();
+  ctx.globalAlpha = opacity;
+
+  // 填充模式：用背景色的补色做叠亮
+  if (blend === 'screen') {
+    ctx.globalCompositeOperation = 'screen';
+  } else if (blend === 'overlay') {
+    ctx.globalCompositeOperation = 'overlay';
+  } else if (blend === 'soft-light') {
+    ctx.globalCompositeOperation = 'soft-light';
+  } else {
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  // 均匀散布：把画布分成 grid，取每个格子里的伪随机位置
+  const cols = Math.ceil(Math.sqrt(count * W / H));
+  const rows = Math.ceil(count / cols);
+  const cellW = W / cols;
+  const cellH = H / rows;
+  const padding = Math.min(cellW, cellH) * 0.15;
+
+  for (let i = 0; i < count; i++) {
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    const item = items[i % items.length];
+    // 格内伪随机偏移
+    const offX = rng(i * 13.7 + 1) * (cellW - padding * 2 - item.sz[1]);
+    const offY = rng(i * 7.3 + 2) * (cellH - padding * 2 - item.sz[1]);
+    const cx = col * cellW + padding + offX + (item.sz[1] || 50) / 2;
+    const cy = row * cellH + padding + offY + (item.sz[1] || 50) / 2;
+    // 大小在范围内随机
+    const sz = sMin + rng(i * 3.1 + 5) * (sMax - sMin);
+    // 旋转随机
+    const angle = rng(i * 2.7 + 8) * 40 - 20; // ±20度
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(angle * Math.PI / 180);
+    ctx.font = sz + 'px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(item.icon, 0, 0);
+    ctx.restore();
+  }
+
+  ctx.restore();
+}
+
+function randomize() {
+  const rooms = ['living', 'bedroom', 'kitchen', 'dining', 'bathroom', 'toilet', 'office', 'study', 'hallway', 'balcony', 'entryway', 'garage', 'garden', 'gym', 'kids', 'laundry', 'storage'];
+  state.room = rooms[Math.floor(Math.random() * rooms.length)];
+  state.customIcon = null;
+  
+  const hue1 = Math.random() * 360;
+  const hue2 = (hue1 + 80 + Math.random() * 80) % 360;
+  const hue3 = (hue2 + 70 + Math.random() * 70) % 360;
+  const hue4 = (hue3 + 60 + Math.random() * 60) % 360;
+  const hue5 = (hue4 + 50 + Math.random() * 50) % 360;
+  function hslToHex(h, s, l) {
+    s /= 100; l /= 100;
+    const a = s * Math.min(l, 1 - l);
+    const f = n => { const k = (n + h / 30) % 12; const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1); return Math.round(255 * color).toString(16).padStart(2, '0'); };
+    return '#' + f(0) + f(8) + f(4);
+  }
+  state.stops = [
+    { color: hslToHex(hue1, 55 + Math.random()*20, 5 + Math.random()*6), pos: 0 },
+    { color: hslToHex(hue2, 50 + Math.random()*20, 10 + Math.random()*8), pos: 0.2 + Math.random()*0.1 },
+    { color: hslToHex(hue3, 45 + Math.random()*20, 15 + Math.random()*10), pos: 0.4 + Math.random()*0.1 },
+    { color: hslToHex(hue4, 40 + Math.random()*20, 20 + Math.random()*10), pos: 0.6 + Math.random()*0.1 },
+    { color: hslToHex(hue5, 35 + Math.random()*20, 25 + Math.random()*12), pos: 1 },
+  ];
+  state.angle = Math.floor(Math.random() * 8) * 45;
+  const overlayIds = ['none', 'lightBeam', 'lightOrb', 'dualOrb', 'aurora', 'lens', 'sunset'];
+  selectOverlay(overlayIds[Math.floor(Math.random() * overlayIds.length)]);
+  document.querySelectorAll('.dir-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.angle) === state.angle));
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  
+  // 更新房间选中状态
+  document.querySelectorAll('.room-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.room === state.room);
+  });
+  
+  renderStopsUI();
+  render();
+}
+
+function exportImage(fmt) {
+  // 确保导出时图标可见
+  const wasUploaded = state.room === 'upload' && state.customIcon;
+  const format = fmt || 'png';
+  render();
+  const link = document.createElement('a');
+  const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
+  const ext = format === 'jpeg' ? 'jpg' : 'png';
+  link.download = 'homekit-' + (wasUploaded ? 'custom' : state.room) + '-' + state.canvasW + 'x' + state.canvasH + '.' + ext;
+  link.href = canvas.toDataURL(mimeType, format === 'jpeg' ? 0.95 : undefined);
+  link.click();
+}
+
+
+// 首次访问引导
+(function() {
+  if (localStorage.getItem('hk-onboarded')) return;
+  const overlay = document.getElementById('onboarding');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  const dismiss = () => {
+    overlay.classList.add('hiding');
+    setTimeout(() => { overlay.style.display = 'none'; }, 300);
+    localStorage.setItem('hk-onboarded', '1');
+  };
+  document.getElementById('onboarding-start').addEventListener('click', dismiss);
+  overlay.addEventListener('click', e => { if (e.target === overlay) dismiss(); });
+})();
+
+// 明暗模式切换
+const themeBtn = document.getElementById('theme-toggle');
+const savedTheme = localStorage.getItem('hk-theme');
+if (savedTheme === "light" || !savedTheme) {
+  document.documentElement.setAttribute('data-theme', 'light');
+  themeBtn.textContent = '☀️';
+}
+themeBtn.addEventListener('click', () => {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  if (isLight) {
+    document.documentElement.removeAttribute('data-theme');
+    themeBtn.textContent = '🌙';
+    localStorage.setItem('hk-theme', 'dark');
+  } else {
+    document.documentElement.setAttribute('data-theme', 'light');
+    themeBtn.textContent = '☀️';
+    localStorage.setItem('hk-theme', 'light');
+  }
+});
+
+// 尺寸选择器事件
+document.getElementById('size-selector').addEventListener('click', e => {
+  const btn = e.target.closest('.size-btn');
+  if (!btn) return;
+  const sizeKey = btn.dataset.size;
+  const sizeData = SIZE_MAP[sizeKey];
+  if (sizeData) {
+    state.canvasW = sizeData.w;
+    state.canvasH = sizeData.h;
+    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+    document.getElementById('info-size').textContent = state.canvasW + ' × ' + state.canvasH;
+  }
+});
+
+// 语言切换
+const langBtn = document.getElementById('lang-toggle');
+function updateLanguage() {
+  // Logo
+  document.querySelector('.logo').innerHTML = '<div class="logo-dot"></div>' + t('title');
+  // Section labels
+  document.querySelectorAll('.section-label').forEach(el => {
+    if (el.dataset.i18n) el.textContent = t(el.dataset.i18n);
+  });
+  // Collapsible labels (color stops section)
+  document.querySelectorAll('.collapsible-label [data-i18n]').forEach(el => {
+    el.textContent = t(el.dataset.i18n);
+  });
+  // Room buttons
+  document.querySelectorAll('.room-btn').forEach(btn => {
+    const roomKey = btn.dataset.room;
+    if (roomKey && I18N[lang].rooms[roomKey]) {
+      const icon = ROOM_ICONS[roomKey] || '';
+      btn.innerHTML = '<span class="room-icon">' + icon + '</span>' + I18N[lang].rooms[roomKey];
+    }
+  });
+  // Type tabs
+  document.querySelectorAll('.type-tab').forEach(tab => {
+    if (tab.dataset.i18n) tab.textContent = t(tab.dataset.i18n);
+  });
+  // Direction labels
+  document.querySelectorAll('.dir-btn').forEach(btn => {
+    const label = btn.querySelector('.dir-label');
+    if (label && btn.dataset.angle) label.textContent = t('dirLabels')[btn.dataset.angle] || '';
+  });
+  // Control labels
+  document.querySelectorAll('.control-label').forEach(el => {
+    if (el.dataset.i18n) el.textContent = t(el.dataset.i18n);
+  });
+  // Zoom label
+  document.querySelectorAll('label[data-i18n]').forEach(el => {
+    if (el.dataset.i18n) el.textContent = t(el.dataset.i18n);
+  });
+  // Deco settings - blend mode buttons
+  if (document.getElementById('deco-settings')) {
+    document.querySelectorAll('.blend-tab').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.value === state.decoBlend);
+    });
+  }
+  // Title attributes (buttons)
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (key && el.title && el.title !== '') el.title = t(key);
+  });
+  // Add stop button
+  document.getElementById('add-stop-btn').textContent = t('addStop');
+  // Overlay buttons
+  initOverlays();
+  // Export button
+  document.querySelector('.btn-export').textContent = t('export');
+  document.querySelectorAll('.export-dropdown-item').forEach(btn => {
+    if (btn.dataset.format === 'png') btn.textContent = t('exportPNG');
+    else if (btn.dataset.format === 'jpeg') btn.textContent = t('exportJPEG');
+  });
+  // Info bar
+  document.getElementById('info-stops').textContent = document.querySelectorAll('.color-stop-row').length + t('stops');
+  document.getElementById('info-type').textContent = t(state.gradientType);
+  // Header meta
+  document.querySelector('.header-meta').textContent = t('engine');
+  // Size buttons
+  document.querySelectorAll('.size-btn').forEach(btn => {
+    const key = btn.dataset.size;
+    if (key && I18N[lang].sizes[key]) btn.textContent = I18N[lang].sizes[key];
+  });
+  // Preset labels
+  PRESETS.forEach((p, i) => {
+    const name = I18N[lang].presetNames[p.nameKey] || p.nameKey;
+    const btns = document.querySelectorAll('.preset-btn[data-index="'+i+'"]');
+    btns.forEach(b => { b.querySelector('.preset-label').textContent = name; });
+  });
+}
+
+langBtn.addEventListener('click', () => {
+  lang = lang === 'zh' ? 'en' : 'zh';
+  localStorage.setItem('wallpaper-lang', lang);
+  updateLanguage();
+});
+
+initPresets();
+initOverlays();
+if (PRESETS.length > 0) {
+  const firstBtn = document.querySelector('.preset-btn');
+  if (firstBtn) applyPreset(PRESETS[0], firstBtn);
+}
+renderStopsUI();
+updateLanguage();
+
+// Render after layout is complete
+requestAnimationFrame(() => {
+  render();
+  // Sync zoom slider to actual fit level after first layout
+  requestAnimationFrame(() => {
+    syncZoomToFit();
+    const ro = new ResizeObserver(() => { requestAnimationFrame(render); });
+    const wrapper = document.querySelector('.canvas-wrapper');
+    if (wrapper) ro.observe(wrapper);
+  });
+});
+
+var _syncingZoom = false;
+var _resizing = false;
+function syncZoomToFit() {
+  const wrapper = document.querySelector('.canvas-wrapper');
+  if (!wrapper) return;
+  const maxW = wrapper.clientWidth - 48, maxH = wrapper.clientHeight - 48;
+  const W = state.canvasW, H = state.canvasH;
+  const fitRatio = Math.min(maxW / W, maxH / H, 1);
+  // Find closest ZOOM_STOPS to fitRatio for slider position
+  let bestIdx = 0, bestDiff = Infinity;
+  ZOOM_STOPS.forEach(function(v, i) {
+    const diff = Math.abs(v - fitRatio);
+    if (diff < bestDiff) { bestDiff = diff; bestIdx = i; }
+  });
+  // But always render at zoomScale >= 1 to ensure canvas fills wrapper
+  // Find smallest ZOOM_STOPS >= 1 for rendering
+  let renderIdx = 3;
+  for (let i = 0; i < ZOOM_STOPS.length; i++) {
+    if (ZOOM_STOPS[i] >= 1) { renderIdx = i; break; }
+  }
+  _syncingZoom = true;
+  zoomSlider.value = bestIdx;  // Slider position matches display
+  state.zoomScale = ZOOM_STOPS[renderIdx];  // Render at full fit (>= 100%)
+  zoomPct.textContent = Math.round(fitRatio * 100) + '%';
+  _syncingZoom = false;
+}
+
+// Update zoom display on window resize (debounced)
+var _resizeTimer;
+window.addEventListener('resize', function() {
+  clearTimeout(_resizeTimer);
+  _resizeTimer = setTimeout(function() {
+    _resizing = true;
+    syncZoomToFit();
+    render();
+    _resizing = false;
+  }, 150);
+});
+
+window.addEventListener('error', e => console.error('[ERR]', e.message, '@', e.lineno));
+window.addEventListener('unhandledrejection', e => console.error('[UNHANDLED]', String(e.reason)));
+</script>
+</body>
+</html>
