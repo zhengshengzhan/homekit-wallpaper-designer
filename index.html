@@ -120,46 +120,46 @@
   .logo {
     font-size: 15px;
     font-weight: 700;
-    letter-spacing: -0.3px;
     display: flex;
     align-items: center;
     gap: 10px;
-    color: var(--text);
   }
-  .logo-icon {
-    width: 28px; height: 28px;
-    border-radius: 7px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
+  .logo-ring {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2.5px solid transparent;
+    background: linear-gradient(var(--surface), var(--surface)) padding-box,
+                linear-gradient(135deg, var(--accent), var(--accent2)) border-box;
     flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px;
-    color: #fff;
-    font-weight: 800;
     position: relative;
-    box-shadow: 0 2px 12px rgba(99,102,241,0.4);
   }
-  .logo-icon::after {
+  .logo-ring::after {
     content: '';
     position: absolute;
     inset: -4px;
-    border-radius: 11px;
-    background: linear-gradient(135deg, var(--accent-40), transparent 60%);
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--accent-20) 0%, transparent 70%);
     z-index: -1;
-    animation: logo-glow 3s ease-in-out infinite;
+    animation: logo-pulse 3s ease-in-out infinite;
   }
-  @keyframes logo-glow {
+  @keyframes logo-pulse {
     0%, 100% { opacity: 0.3; }
-    50% { opacity: 0.7; }
+    50% { opacity: 0.8; }
   }
-  .logo-text { display: flex; flex-direction: column; line-height: 1.1; }
+  .logo-text { display: flex; flex-direction: column; line-height: 1.15; }
   .logo-text span:first-child {
-    font-size: 13px; font-weight: 800;
-    background: linear-gradient(90deg, var(--text) 40%, var(--accent));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    font-size: 14px;
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     background-clip: text;
   }
   .logo-text span:last-child {
-    font-size: 10px; font-weight: 400; color: var(--text-dim); letter-spacing: 0.08em;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-dim);
   }
   .header-meta { font-size: 11px; color: var(--text-dim); letter-spacing: 0; }
   .header-actions { display: flex; align-items: center; gap: 8px; height: 36px; flex-shrink: 0; }
@@ -472,7 +472,7 @@
 </head>
 <body>
 <header>
-  <div class="logo"><div class="logo-icon">H</div><div class="logo-text"><span>HomeKit</span><span>墙纸设计器</span></div></div>
+  <div class="logo"><div class="logo-ring"></div><div class="logo-text"><span>HomeKit</span><span>墙纸设计器</span></div></div>
   <div class="header-actions">
     <div class="header-meta" data-i18n="engine">v1.3 · Gradient Engine · by:Zan</div>
     <button class="theme-btn" id="lang-toggle" title="切换语言" data-i18n="switchLang">🌐</button>
@@ -1987,7 +1987,7 @@ document.getElementById('size-selector').addEventListener('click', e => {
 const langBtn = document.getElementById('lang-toggle');
 function updateLanguage() {
   // Logo
-  document.querySelector('.logo').innerHTML = '<div class="logo-icon">H</div><div class="logo-text"><span>HomeKit</span><span>' + t('title') + '</span></div>';
+  document.querySelector('.logo').innerHTML = '<div class="logo-ring"></div><div class="logo-text"><span>HomeKit</span><span>' + t('title').replace('HomeKit ', '') + '</span></div>';
   // Section labels
   document.querySelectorAll('.section-label').forEach(el => {
     if (el.dataset.i18n) el.textContent = t(el.dataset.i18n);
