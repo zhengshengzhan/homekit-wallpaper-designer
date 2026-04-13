@@ -401,7 +401,7 @@
   /* ── Canvas Area ── */
   .canvas-area { display: flex; flex-direction: column; position: relative; overflow: hidden; min-height: 0; height: calc(100vh - 52px); }
   .canvas-toolbar { display: flex; align-items: center; justify-content: space-between; padding: 8px 20px; flex-shrink: 0; height: 56px; box-sizing: border-box; position: relative; z-index: 10; min-width: 0; }
-  .size-selector { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; flex-shrink: 0; flex-wrap: nowrap; align-items: center; height: 36px; box-sizing: border-box; }
+  .size-selector { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; flex-shrink: 1; flex-wrap: nowrap; align-items: center; height: 36px; box-sizing: border-box; max-width: calc(100% - 120px); }
   .size-selector::-webkit-scrollbar { display: none; }
   .size-btn { background: none; border: none; border-radius: var(--radius-sm); padding: 6px 10px; font-size: 11px; color: var(--text-dim); cursor: pointer; transition: background 0.2s, color 0.2s; white-space: nowrap; flex-shrink: 0; }
   .size-btn:hover { background: var(--surface2); color: var(--text); }
