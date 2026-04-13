@@ -528,10 +528,10 @@
         <input type="range" class="slider" id="slider-deco-opacity" min="10" max="100" value="72">
         <div class="control-row" style="margin-top:4px"><span class="control-label" data-i18n="decoBlend">混个模式</span></div>
         <div id="select-deco-blend" class="blend-tabs" style="display:flex;gap:3px;background:var(--surface2);border-radius:var(--radius-sm);padding:3px;margin-bottom:4px">
+          <button class="blend-tab active" data-value="source-over" onclick="setBlendMode(this)">Normal</button>
           <button class="blend-tab" data-value="screen" onclick="setBlendMode(this)">Screen</button>
           <button class="blend-tab" data-value="overlay" onclick="setBlendMode(this)">Overlay</button>
           <button class="blend-tab" data-value="soft-light" onclick="setBlendMode(this)">Soft</button>
-          <button class="blend-tab active" data-value="source-over" onclick="setBlendMode(this)">Normal</button>
         </div>
       </div>
     </div>
