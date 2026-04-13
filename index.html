@@ -535,6 +535,31 @@
         </div>
       </div>
     </div>
+    <div class="section" id="image-control-section">
+      <div class="section-label" data-i18n="insertImage">插入图片</div>
+      <div class="toggle-row"><span class="control-label" data-i18n="showImage">显示图片</span><div class="toggle" id="toggle-image" onclick="toggleEffect('image')"></div></div>
+      <div id="image-settings" style="margin-top:10px;display:none">
+        <input type="file" id="image-upload" accept="image/*" style="display:none" onchange="handleImageUpload(this)">
+        <button onclick="document.getElementById('image-upload').click()" style="width:100%;padding:8px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);cursor:pointer;font-size:12px;margin-bottom:10px">📷 选择图片</button>
+        <div class="control-row"><span class="control-label" data-i18n="imgScale">图片缩放</span><span class="control-value" id="val-image-scale">50%</span></div>
+        <input type="range" class="slider" id="slider-image-scale" min="10" max="200" step="5" value="50" oninput="document.getElementById('val-image-scale').textContent=this.value+'%';state.imageScale=this.value/100;render()">
+        <div class="control-row"><span class="control-label" data-i18n="imgX">水平位置</span><span class="control-value" id="val-image-x">50%</span></div>
+        <input type="range" class="slider" id="slider-image-x" min="0" max="100" step="1" value="50" oninput="document.getElementById('val-image-x').textContent=this.value+'%';state.imageX=this.value/100;render()">
+        <div class="control-row"><span class="control-label" data-i18n="imgY">垂直位置</span><span class="control-value" id="val-image-y">50%</span></div>
+        <input type="range" class="slider" id="slider-image-y" min="0" max="100" step="1" value="50" oninput="document.getElementById('val-image-y').textContent=this.value+'%';state.imageY=this.value/100;render()">
+        <div class="control-row"><span class="control-label" data-i18n="imgFeather">边缘柔化</span><span class="control-value" id="val-image-feather">30%</span></div>
+        <input type="range" class="slider" id="slider-image-feather" min="0" max="100" step="5" value="30" oninput="document.getElementById('val-image-feather').textContent=this.value+'%';state.imageFeather=this.value/100;render()">
+        <div class="control-row"><span class="control-label" data-i18n="imgOpacity">图片透明度</span><span class="control-value" id="val-image-opacity">80%</span></div>
+        <input type="range" class="slider" id="slider-image-opacity" min="10" max="100" step="5" value="80" oninput="document.getElementById('val-image-opacity').textContent=this.value+'%';state.imageOpacity=this.value/100;render()">
+        <div class="control-row" style="margin-top:4px"><span class="control-label" data-i18n="imgBlend">混合模式</span></div>
+        <div id="image-blend-tabs" class="blend-tabs" style="display:flex;gap:3px;background:var(--surface2);border-radius:var(--radius-sm);padding:3px;margin-bottom:4px">
+          <button class="blend-tab active" data-value="screen" onclick="setImageBlendMode(this)">Screen</button>
+          <button class="blend-tab" data-value="overlay" onclick="setImageBlendMode(this)">Overlay</button>
+          <button class="blend-tab" data-value="soft-light" onclick="setImageBlendMode(this)">Soft</button>
+          <button class="blend-tab" data-value="normal" onclick="setImageBlendMode(this)">Normal</button>
+        </div>
+      </div>
+    </div>
     <div class="section" id="icon-control-section">
       <div class="section-label" data-i18n="roomIcon">房间图标</div>
       <div class="toggle-row"><span class="control-label" data-i18n="showIcon">显示图标</span><div class="toggle" id="toggle-icon" onclick="toggleEffect('icon')"></div></div>
@@ -619,7 +644,7 @@ const state = {
     { color: '#F58B8B', pos: 0.75 },
     { color: '#C26DAD', pos: 1 }
   ],
-  effects: { noise: false, vignette: false, bloom: true, icon: false, deco: false },
+  effects: { noise: false, vignette: false, bloom: true, icon: false, deco: false, image: false },
   overlay: 'none',
   canvasW: 1290,
   canvasH: 2796,
@@ -635,6 +660,15 @@ const state = {
   decoOpacity: 0.72,
   decoBlend: 'screen',
   _decoCache: null,
+  // 插入图片
+  image: null,
+  imageSrc: null,
+  imageScale: 0.5,
+  imageX: 0.5,
+  imageY: 0.5,
+  imageFeather: 0.3,
+  imageOpacity: 0.8,
+  imageBlend: 'screen',
   zoomScale: 1
 };
 
@@ -670,6 +704,14 @@ const I18N = {
     bloom: '柔和光晕',
     roomIcon: '房间图标',
     showIcon: '显示图标',
+    insertImage: '插入图片',
+    showImage: '显示图片',
+    imgScale: '图片缩放',
+    imgX: '水平位置',
+    imgY: '垂直位置',
+    imgFeather: '边缘柔化',
+    imgOpacity: '图片透明度',
+    imgBlend: '混合模式',
     iconSize: '图标大小',
     iconX: '水平位置',
     iconY: '垂直位置',
@@ -724,6 +766,14 @@ const I18N = {
     bloom: 'Soft Bloom',
     roomIcon: 'Room Icon',
     showIcon: 'Show Icon',
+    insertImage: 'Insert Image',
+    showImage: 'Show Image',
+    imgScale: 'Image Scale',
+    imgX: 'Horizontal Position',
+    imgY: 'Vertical Position',
+    imgFeather: 'Edge Feather',
+    imgOpacity: 'Image Opacity',
+    imgBlend: 'Blend Mode',
     iconSize: 'Icon Size',
     iconX: 'Horizontal Position',
     iconY: 'Vertical Position',
@@ -1314,11 +1364,39 @@ zoomSlider.addEventListener('input', () => {
     };
 
 
+function handleImageUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      state.image = img;
+      state.imageSrc = e.target.result;
+      state.effects.image = true;
+      document.getElementById('toggle-image').classList.add('on');
+      document.getElementById('image-settings').style.display = '';
+      render();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function setImageBlendMode(btn) {
+  document.querySelectorAll('#image-blend-tabs .blend-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.imageBlend = btn.dataset.value;
+  render();
+}
+
+
 function toggleEffect(name) {
   state.effects[name] = !state.effects[name];
   document.getElementById('toggle-'+name).classList.toggle('on', state.effects[name]);
   if (name === 'icon') document.getElementById('icon-settings').style.display = state.effects.icon ? '' : 'none';
   if (name === 'deco') document.getElementById('deco-settings').style.display = state.effects.deco ? '' : 'none';
+  if (name === 'image') document.getElementById('image-settings').style.display = state.effects.image ? '' : 'none';
   render();
 }
 
@@ -1344,6 +1422,7 @@ function render() {
   if (state.effects.noise) drawNoise(W, H);
   if (state.effects.vignette) drawVignette(W, H);
   if (state.effects.deco) drawRoomDeco(W, H);
+  if (state.effects.image && state.image) drawInsertedImage(W, H);
   if (state.effects.icon) drawRoomIcon(W, H);
 }
 
@@ -1679,6 +1758,70 @@ function drawRoomDeco(W, H) {
     ctx.restore();
   }
 
+  ctx.restore();
+}
+
+function drawInsertedImage(W, H) {
+  const img = state.image;
+  if (!img) return;
+  
+  ctx.save();
+  
+  // 计算图片尺寸（保持宽高比）
+  const scale = state.imageScale || 0.5;
+  const imgRatio = img.width / img.height;
+  let drawW = W * scale;
+  let drawH = drawW / imgRatio;
+  if (drawH > H * scale) {
+    drawH = H * scale;
+    drawW = drawH * imgRatio;
+  }
+  
+  // 计算位置
+  const x = W * (state.imageX || 0.5) - drawW / 2;
+  const y = H * (state.imageY || 0.5) - drawH / 2;
+  
+  // 边缘柔化
+  const feather = state.imageFeather || 0;
+  const featherPx = Math.min(feather * Math.min(drawW, drawH), 200);
+  
+  // 创建边缘柔化遮罩
+  if (feather > 0) {
+    ctx.save();
+    ctx.beginPath();
+    const cx = x + drawW / 2;
+    const cy = y + drawH / 2;
+    const rx = drawW / 2;
+    const ry = drawH / 2;
+    const innerR = Math.max(0, Math.min(rx, ry) - featherPx);
+    ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+    ctx.ellipse(cx, cy, innerR, innerR * (ry/rx), 0, 0, Math.PI * 2);
+    ctx.clip('evenodd');
+  }
+  
+  // 设置混合模式和透明度
+  ctx.globalCompositeOperation = state.imageBlend || 'screen';
+  ctx.globalAlpha = state.imageOpacity || 0.8;
+  
+  // 绘制图片
+  ctx.drawImage(img, x, y, drawW, drawH);
+  
+  if (feather > 0) {
+    // 添加径向渐变柔化边缘
+    const cx = x + drawW / 2;
+    const cy = y + drawH / 2;
+    const outerR = Math.sqrt(drawW*drawW + drawH*drawH) / 2;
+    const grad = ctx.createRadialGradient(cx, cy, outerR * 0.5, cx, cy, outerR);
+    grad.addColorStop(0, 'rgba(255,255,255,0)');
+    grad.addColorStop(0.7, 'rgba(255,255,255,0)');
+    grad.addColorStop(1, 'rgba(255,255,255,1)');
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = grad;
+    ctx.fillRect(x, y, drawW, drawH);
+    ctx.restore();
+  }
+  
   ctx.restore();
 }
 
