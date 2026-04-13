@@ -162,7 +162,10 @@
   .logo-text span:first-child {
     font-size: 14px;
     font-weight: 800;
-    color: var(--accent);
+    background: linear-gradient(135deg, #a855f7, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
   .logo-text span:last-child {
     font-size: 11px;
@@ -170,11 +173,11 @@
     color: var(--text-dim);
   }
 
-  [data-theme="dark"] .logo-text span:first-child {
-    color: #818cf8;
-  }
   [data-theme="light"] .logo-text span:first-child {
-    color: var(--accent);
+    background: linear-gradient(135deg, #7c3aed, #db2777);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
   .header-meta { font-size: 11px; color: var(--text-dim); letter-spacing: 0; }
   .header-actions { display: flex; align-items: center; gap: 8px; height: 36px; flex-shrink: 0; }
