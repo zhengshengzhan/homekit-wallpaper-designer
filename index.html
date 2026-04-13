@@ -1449,25 +1449,54 @@ function drawRadial(W, H) {
 }
 
 function drawMesh(W, H) {
-  ctx.fillStyle = state.stops[0]?.color || '#000';
+  // 底层：填充第一节点的暗色作为基底
+  ctx.fillStyle = state.stops[0]?.color || '#1a1a2e';
   ctx.fillRect(0, 0, W, H);
-  const points = [
-    { x: 0.15, y: 0.15, color: state.stops[0]?.color || '#000' },
-    { x: 0.85, y: 0.1, color: state.stops[1]?.color || '#333' },
-    { x: 0.1, y: 0.75, color: state.stops[2]?.color || '#666' },
-    { x: 0.9, y: 0.8, color: state.stops[Math.min(3, state.stops.length-1)]?.color || '#444' },
-    { x: 0.5, y: 0.45, color: state.stops[Math.floor(state.stops.length/2)]?.color || '#555' },
-  ];
-  ctx.globalCompositeOperation = 'screen';
-  points.forEach(p => {
-    const r = Math.max(W, H) * 0.75;
-    const grad = ctx.createRadialGradient(p.x*W, p.y*H, 0, p.x*W, p.y*H, r);
-    grad.addColorStop(0, p.color + 'aa');
-    grad.addColorStop(0.4, p.color + '66');
+
+  const stops = state.stops;
+  const n = stops.length;
+  if (n === 0) return;
+
+  // === Apple 风格多点网格渐变 ===
+  // 策略：每个颜色节点在画布上有一个锚点位置
+  // 锚点按角度均匀分布在画布边缘，中间放一个中心节点
+  // 用 multiply 混合代替 screen：颜色相乘，明暗自然过渡不过度发亮
+
+  const cx = W * 0.5;
+  const cy = H * 0.5;
+  const R = Math.max(W, H) * 0.85; // 渐变半径
+
+  // 计算每个节点在画布上的锚点位置
+  // 角度从 -90° 开始（顶部），按数量均匀分配
+  const meshPoints = stops.map((stop, i) => {
+    if (i === 0) {
+      // 第一个节点放顶部中央
+      return { x: cx, y: H * 0.12, color: stop.color };
+    }
+    // 其余节点沿画布边缘均匀分布
+    const angleDeg = -90 + ((i - 1) / Math.max(n - 2, 1)) * 180;
+    const angleRad = angleDeg * Math.PI / 180;
+    // 椭圆边缘上的点
+    const margin = R * 0.82;
+    const ex = cx + margin * Math.cos(angleRad) * (W / Math.max(W, H));
+    const ey = H * 0.5 + margin * Math.sin(angleRad) * (H / Math.max(W, H));
+    return { x: ex, y: ey, color: stop.color };
+  });
+
+  ctx.globalCompositeOperation = 'multiply';
+
+  meshPoints.forEach(p => {
+    // 每个锚点画一个大径向渐变
+    const r = Math.max(W, H) * 0.9;
+    const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
+    grad.addColorStop(0, p.color + 'cc');      // 80% 不透明
+    grad.addColorStop(0.35, p.color + '88');  // 53% 不透明
+    grad.addColorStop(0.7, p.color + '33');   // 20% 不透明
     grad.addColorStop(1, 'transparent');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, W, H);
   });
+
   ctx.globalCompositeOperation = 'source-over';
 }
 
