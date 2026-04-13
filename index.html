@@ -149,10 +149,7 @@
   .logo-text span:first-child {
     font-size: 14px;
     font-weight: 800;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--accent);
   }
   .logo-text span:last-child {
     font-size: 11px;
@@ -162,23 +159,15 @@
 
   [data-theme="dark"] .logo-ring {
     border-color: #818cf8;
-    background: transparent;
   }
   [data-theme="dark"] .logo-text span:first-child {
-    background: linear-gradient(90deg, #fff, #c4b5fd);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #818cf8;
   }
   [data-theme="light"] .logo-ring {
     border-color: var(--accent);
-    background: transparent;
   }
   [data-theme="light"] .logo-text span:first-child {
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--accent);
   }
   .header-meta { font-size: 11px; color: var(--text-dim); letter-spacing: 0; }
   .header-actions { display: flex; align-items: center; gap: 8px; height: 36px; flex-shrink: 0; }
