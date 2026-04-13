@@ -125,10 +125,13 @@
     gap: 10px;
   }
   .logo-ring {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
-    border: 2.5px solid var(--accent);
+    border: 3px solid transparent;
+    background:
+      linear-gradient(var(--surface), var(--surface)) padding-box,
+      linear-gradient(135deg, #a855f7, #ec4899) border-box;
     flex-shrink: 0;
     position: relative;
   }
@@ -137,13 +140,23 @@
     position: absolute;
     inset: -4px;
     border-radius: 50%;
-    background: radial-gradient(circle, var(--accent-20) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(168,85,247,0.3) 0%, transparent 70%);
     z-index: -1;
     animation: logo-pulse 3s ease-in-out infinite;
   }
   @keyframes logo-pulse {
     0%, 100% { opacity: 0.3; }
     50% { opacity: 0.8; }
+  }
+
+  [data-theme="light"] .logo-ring {
+    background:
+      linear-gradient(var(--surface2), var(--surface2)) padding-box,
+      linear-gradient(135deg, #7c3aed, #db2777) border-box;
+    box-shadow: 0 1px 4px rgba(124,58,237,0.25);
+  }
+  [data-theme="light"] .logo-ring::after {
+    background: radial-gradient(circle, rgba(124,58,237,0.4) 0%, transparent 70%);
   }
   .logo-text { display: flex; flex-direction: column; line-height: 1.15; }
   .logo-text span:first-child {
@@ -157,14 +170,8 @@
     color: var(--text-dim);
   }
 
-  [data-theme="dark"] .logo-ring {
-    border-color: #818cf8;
-  }
   [data-theme="dark"] .logo-text span:first-child {
     color: #818cf8;
-  }
-  [data-theme="light"] .logo-ring {
-    border-color: var(--accent);
   }
   [data-theme="light"] .logo-text span:first-child {
     color: var(--accent);
