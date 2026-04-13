@@ -181,9 +181,12 @@
     text-transform: uppercase;
     color: var(--text-dim);
     margin-bottom: 12px;
+    height: 20px;
+    line-height: 20px;
     display: flex;
     align-items: center;
     gap: 8px;
+    /* 固定高度，行高固定，语言切换时不产生重排 */
   }
   .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
   /* ── Presets ── */
@@ -328,12 +331,35 @@
   .add-stop-btn { width: 100%; background: none; border: 1.5px dashed var(--border); border-radius: var(--radius-md); padding: 8px; color: var(--text-dim); font-size: 12px; cursor: pointer; transition: border-color 0.2s, color 0.2s; letter-spacing: 0; }
   .add-stop-btn:hover { border-color: var(--accent); color: var(--accent); }
   /* ── Controls ── */
-  .control-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-  .control-label { font-size: 12px; color: var(--text-dim); letter-spacing: 0; }
+  .control-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; min-height: 24px; }
+  .control-label {
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 0;
+    width: 88px;
+    flex-shrink: 0;
+    text-align: justify;
+    text-align-last: justify;
+    /* 单行文字时两端对齐 */
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
   .control-value { font-size: 12px; color: var(--text-dim); min-width: 40px; text-align: right; font-family: 'SF Mono', 'Fira Code', monospace; letter-spacing: 0; }
   .slider { width: 100%; -webkit-appearance: none; height: 4px; background: var(--border); border-radius: 2px; outline: none; margin-bottom: 8px; }
   .slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 8px var(--accent-25); }
-  .toggle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; min-height: 26px; }
+  .toggle-row .control-label {
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: 88px;
+    width: 88px;
+    text-align: justify;
+    text-align-last: justify;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
   .toggle { width: 44px; height: 26px; background: var(--surface2); border: none; border-radius: 13px; cursor: pointer; position: relative; transition: background 0.3s var(--ease); flex-shrink: 0; }
   .toggle.on { background: var(--accent); }
   .toggle::after { content: ''; position: absolute; width: 22px; height: 22px; border-radius: 50%; background: #fff; top: 2px; left: 2px; transition: transform 0.3s var(--ease); box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
