@@ -95,19 +95,16 @@
     gap: 10px;
   }
   .logo-ring {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     border: 3px solid transparent;
     background:
-      conic-gradient(from var(--ring-angle, 0deg), #a855f7, #ec4899, #a855f7) border-box,
-      var(--surface) padding-box;
+      linear-gradient(var(--surface), var(--surface)) padding-box,
+      linear-gradient(135deg, #a855f7, #ec4899) border-box;
     flex-shrink: 0;
     position: relative;
-    animation: ring-spin 4s linear infinite;
   }
-  @keyframes ring-spin { to { --ring-angle: 360deg; } }
-  @property --ring-angle { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
   }
   .logo-ring::after {
     content: '';
@@ -125,8 +122,8 @@
 
   [data-theme="light"] .logo-ring {
     background:
-      conic-gradient(from var(--ring-angle, 0deg), #7c3aed, #db2777, #7c3aed) border-box,
-      var(--surface2) padding-box;
+      linear-gradient(var(--surface2), var(--surface2)) padding-box,
+      linear-gradient(135deg, #7c3aed, #db2777) border-box;
     box-shadow: 0 1px 4px rgba(124,58,237,0.25);
   }
   [data-theme="light"] .logo-ring::after {
