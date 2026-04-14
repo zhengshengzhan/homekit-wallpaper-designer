@@ -150,6 +150,16 @@
     background-clip: text;
   }
   .header-meta { font-size: 11px; color: var(--text-dim); letter-spacing: 0; }
+  .coffee-btn { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-dim);
+    padding: 3px 8px; border-radius: 6px; border: none; background: none; cursor: pointer;
+    transition: background 0.15s var(--ease), color 0.15s var(--ease); position: relative; white-space: nowrap; }
+  .coffee-btn:hover { background: var(--surface2); color: var(--text); }
+  .coffee-btn .coffee-popup { display: none; position: absolute; top: calc(100% + 8px); right: 0; z-index: 100;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); width: 180px; }
+  .coffee-btn:hover .coffee-popup { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .coffee-popup img { width: 156px; height: 156px; border-radius: 8px; object-fit: cover; }
+  .coffee-popup span { font-size: 11px; color: var(--text-dim); }
   .header-actions { display: flex; align-items: center; gap: 8px; height: 36px; flex-shrink: 0; }
   .theme-btn {
     background: none;
@@ -439,6 +449,9 @@
 <header>
   <div class="logo"><div class="logo-ring"></div><div class="logo-text"><span>HomeKit</span><span>墙纸设计器</span></div></div>
   <div class="header-actions">
+    <button class="coffee-btn" id="coffee-btn">☕ 请我喝咖啡
+      <div class="coffee-popup"><img src="PayQrcode.png" alt="PayQR"><span>扫码支持开发者</span></div>
+    </button>
     <div class="header-meta" data-i18n="engine">v1.3 · Gradient Engine · by:Zan</div>
     <button class="theme-btn" id="lang-toggle" title="切换语言">🌐</button>
     <button class="theme-btn" id="theme-toggle" title="切换明暗模式">🌙</button>
