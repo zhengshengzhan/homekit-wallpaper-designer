@@ -337,12 +337,10 @@
     font-size: 12px;
     color: var(--text-dim);
     letter-spacing: 0;
-    width: 88px;
+    width: 120px;
     flex-shrink: 0;
     text-align: left;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    white-space: normal;
   }
   .control-value { font-size: 12px; color: var(--text-dim); min-width: 40px; text-align: right; font-family: 'SF Mono', 'Fira Code', monospace; letter-spacing: 0; }
   .slider { width: 100%; -webkit-appearance: none; height: 4px; background: var(--border); border-radius: 2px; outline: none; margin-bottom: 8px; }
@@ -351,12 +349,10 @@
   .toggle-row .control-label {
     flex-grow: 0;
     flex-shrink: 0;
-    flex-basis: 88px;
-    width: 88px;
+    flex-basis: 120px;
+    width: 120px;
     text-align: left;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    white-space: normal;
   }
   .toggle { width: 44px; height: 26px; background: var(--surface2); border: none; border-radius: 13px; cursor: pointer; position: relative; transition: background 0.3s var(--ease); flex-shrink: 0; }
   .toggle.on { background: var(--accent); }
@@ -391,7 +387,7 @@
   .zoom-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); border: none; cursor: pointer; transition: box-shadow 0.2s; }
   .zoom-slider::-webkit-slider-thumb:hover { box-shadow: 0 0 10px var(--accent-25); }
   .zoom-slider::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--accent); border: none; cursor: pointer; }
-  .zoom-pct { font-size: 11px; color: var(--accent); min-width: 32px; text-align: right; font-family: 'SF Mono', 'Fira Code', monospace; letter-spacing: 0; }
+  .zoom-pct { font-size: 11px; color: var(--text-dim); min-width: 32px; text-align: right; font-family: 'SF Mono', 'Fira Code', monospace; letter-spacing: 0; }
   .canvas-wrapper { flex: 1; display: flex; align-items: center; justify-content: center; overflow: auto; min-height: 0; padding: 24px; max-height: 100%; position: relative; }
   
   .deco-settings { display: none; padding: 8px 0 4px; border-top: 1px solid var(--border); margin-top: 2px; }
@@ -444,8 +440,8 @@
   <div class="logo"><div class="logo-ring"></div><div class="logo-text"><span>HomeKit</span><span>墙纸设计器</span></div></div>
   <div class="header-actions">
     <div class="header-meta" data-i18n="engine">v1.3 · Gradient Engine · by:Zan</div>
-    <button class="theme-btn" id="lang-toggle" title="切换语言" data-i18n="switchLang">🌐</button>
-    <button class="theme-btn" id="theme-toggle" title="切换明暗模式" data-i18n="toggleTheme">🌙</button>
+    <button class="theme-btn" id="lang-toggle" title="切换语言">🌐</button>
+    <button class="theme-btn" id="theme-toggle" title="切换明暗模式">🌙</button>
   </div>
 </header>
 <div class="app">
@@ -513,53 +509,29 @@
     <div class="section">
       <div class="section-label" data-i18n="effects">效果</div>
       <div class="toggle-row"><span class="control-label" data-i18n="noise">噪点纹理</span><div class="toggle" id="toggle-noise" onclick="toggleEffect('noise')"></div></div>
-      <div class="control-row"><span class="control-label" data-i18n="noiseIntensity">噪点强度</span><span class="control-value" id="val-noise">0.03</span></div>
+      <div class="control-row" id="noise-intensity-row"><span class="control-label" data-i18n="noiseIntensity">噪点强度</span><span class="control-value" id="val-noise">0.03</span></div>
       <input type="range" class="slider" id="slider-noise" min="0" max="0.12" step="0.005" value="0.03" oninput="document.getElementById('val-noise').textContent=parseFloat(this.value).toFixed(3);render()">
       <div class="toggle-row"><span class="control-label" data-i18n="vignette">暗角效果</span><div class="toggle" id="toggle-vignette" onclick="toggleEffect('vignette')"></div></div>
-      <div class="control-row"><span class="control-label" data-i18n="vignetteIntensity">暗角强度</span><span class="control-value" id="val-vignette">0.45</span></div>
+      <div class="control-row" id="vignette-intensity-row"><span class="control-label" data-i18n="vignetteIntensity">暗角强度</span><span class="control-value" id="val-vignette">0.45</span></div>
       <input type="range" class="slider" id="slider-vignette" min="0" max="1" step="0.05" value="0.45" oninput="document.getElementById('val-vignette').textContent=parseFloat(this.value).toFixed(2);render()">
-    </div>
-    <div class="section">
-      <div class="section-label" data-i18n="decoSection">&#x623F;&#x95F4;&#x88C5;&#x9970;</div>
-      <div class="toggle-row"><span class="control-label" data-i18n="deco">&#x623F;&#x95F4;&#x88C5;&#x9970;</span><div class="toggle" id="toggle-deco" onclick="toggleEffect('deco')"><div class="toggle-thumb"></div></div></div>
-      <div id="deco-settings" style="display:none;padding:8px 0 4px">
-        <div class="control-row"><span class="control-label" data-i18n="decoCount">&#x8D34;&#x7EB8;&#x6570;&#x91CF;</span><span class="control-value" id="val-deco-count">14</span></div>
-        <input type="range" class="slider" id="slider-deco-count" min="4" max="50" value="14">
-        <div class="control-row"><span class="control-label" data-i18n="decoSizeMin">&#x6700;&#x5C0F;&#x5C3A;&#x5BF9;</span><span class="control-value" id="val-deco-size-min">24px</span></div>
-        <input type="range" class="slider" id="slider-deco-size-min" min="10" max="60" value="24">
-        <div class="control-row"><span class="control-label" data-i18n="decoSizeMax">&#x6700;&#x5927;&#x5C3A;&#x5BF9;</span><span class="control-value" id="val-deco-size-max">80px</span></div>
-        <input type="range" class="slider" id="slider-deco-size-max" min="30" max="140" value="80">
-        <div class="control-row"><span class="control-label" data-i18n="decoOpacity">&#x8D34;&#x7EB8;&#x900F;&#x660E;&#x5EA6;</span><span class="control-value" id="val-deco-opacity">72%</span></div>
-        <input type="range" class="slider" id="slider-deco-opacity" min="10" max="100" value="72">
-        <div class="control-row" style="margin-top:4px"><span class="control-label" data-i18n="decoBlend">混个模式</span></div>
-        <div id="select-deco-blend" class="blend-tabs" style="display:flex;gap:3px;background:var(--surface2);border-radius:var(--radius-sm);padding:3px;margin-bottom:4px">
-          <button class="blend-tab active" data-value="source-over" onclick="setBlendMode(this)">Normal</button>
-          <button class="blend-tab" data-value="screen" onclick="setBlendMode(this)">Screen</button>
-          <button class="blend-tab" data-value="overlay" onclick="setBlendMode(this)">Overlay</button>
-          <button class="blend-tab" data-value="soft-light" onclick="setBlendMode(this)">Soft</button>
-        </div>
-      </div>
+      <div class="toggle-row"><span class="control-label" data-i18n="brightness">整体亮度</span><div class="toggle" id="toggle-brightness" onclick="toggleEffect('brightness')"></div></div>
+      <div class="control-row" id="brightness-intensity-row"><span class="control-label" data-i18n="brightnessIntensity">亮度强度</span><span class="control-value" id="val-brightness">0.00</span></div>
+      <input type="range" class="slider" id="slider-brightness" min="-1" max="1" step="0.05" value="0" oninput="document.getElementById('val-brightness').textContent=parseFloat(this.value).toFixed(2);state.brightnessIntensity=parseFloat(this.value);render()">
     </div>
     <div class="section" id="image-control-section">
-      <div class="section-label" data-i18n="insertImage">插入图片</div>
+      <div class="section-label" data-i18n="insertImage">房间图片</div>
       <div class="toggle-row"><span class="control-label" data-i18n="showImage">显示图片</span><div class="toggle" id="toggle-image" onclick="toggleEffect('image')"></div></div>
       <div id="image-settings" style="margin-top:10px;display:none">
         <input type="file" id="image-upload" accept="image/*" style="display:none" onchange="handleImageUpload(this)">
-        <button onclick="document.getElementById('image-upload').click()" style="width:100%;padding:8px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);cursor:pointer;font-size:12px;margin-bottom:10px">📷 选择图片</button>
+        <button onclick="document.getElementById('image-upload').click()" data-i18n="selectImage" style="width:100%;padding:8px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);cursor:pointer;font-size:12px;margin-bottom:10px">📷 选择图片</button>
         <div class="control-row"><span class="control-label" data-i18n="imgScale">图片缩放</span><span class="control-value" id="val-image-scale">50%</span></div>
         <input type="range" class="slider" id="slider-image-scale" min="10" max="200" step="5" value="50" oninput="document.getElementById('val-image-scale').textContent=this.value+'%';state.imageScale=this.value/100;render()">
-        <div class="control-row"><span class="control-label" data-i18n="imgX">水平位置</span><span class="control-value" id="val-image-x">50%</span></div>
-        <input type="range" class="slider" id="slider-image-x" min="0" max="100" step="1" value="50" oninput="document.getElementById('val-image-x').textContent=this.value+'%';state.imageX=this.value/100;render()">
-        <div class="control-row"><span class="control-label" data-i18n="imgY">垂直位置</span><span class="control-value" id="val-image-y">50%</span></div>
-        <input type="range" class="slider" id="slider-image-y" min="0" max="100" step="1" value="50" oninput="document.getElementById('val-image-y').textContent=this.value+'%';state.imageY=this.value/100;render()">
-        <div class="control-row"><span class="control-label" data-i18n="imgFeather">边缘柔化</span><span class="control-value" id="val-image-feather">30%</span></div>
-        <input type="range" class="slider" id="slider-image-feather" min="0" max="100" step="5" value="30" oninput="document.getElementById('val-image-feather').textContent=this.value+'%';state.imageFeather=this.value/100;render()">
-        <div class="control-row"><span class="control-label" data-i18n="imgOpacity">图片透明度</span><span class="control-value" id="val-image-opacity">80%</span></div>
-        <input type="range" class="slider" id="slider-image-opacity" min="10" max="100" step="5" value="80" oninput="document.getElementById('val-image-opacity').textContent=this.value+'%';state.imageOpacity=this.value/100;render()">
-        <div class="control-row" style="margin-top:4px"><span class="control-label" data-i18n="imgOverlayColor">叠加颜色</span></div>
-        <input type="color" id="color-image-overlay" value="#6366f1" style="width:100%;height:32px;border:none;cursor:pointer;margin-bottom:4px" oninput="state.imageOverlayColor=this.value;render()">
-        <div class="control-row"><span class="control-label" data-i18n="imgCoverage">叠加范围</span><span class="control-value" id="val-image-coverage">50%</span></div>
-        <input type="range" class="slider" id="slider-image-coverage" min="0" max="100" step="5" value="50" oninput="document.getElementById('val-image-coverage').textContent=this.value+'%';state.imageCoverage=this.value/100;render()">
+        <div class="control-row"><span class="control-label" data-i18n="imgX">水平位置</span><span class="control-value" id="val-image-x">100%</span></div>
+        <input type="range" class="slider" id="slider-image-x" min="0" max="100" step="1" value="100" oninput="document.getElementById('val-image-x').textContent=this.value+'%';state.imageX=this.value/100;render()">
+        <div class="control-row"><span class="control-label" data-i18n="imgY">垂直位置</span><span class="control-value" id="val-image-y">0%</span></div>
+        <input type="range" class="slider" id="slider-image-y" min="0" max="100" step="1" value="0" oninput="document.getElementById('val-image-y').textContent=this.value+'%';state.imageY=this.value/100;render()">
+        <div class="control-row"><span class="control-label" data-i18n="imgOpacity">图片透明度</span><span class="control-value" id="val-image-opacity">45%</span></div>
+        <input type="range" class="slider" id="slider-image-opacity" min="10" max="80" step="5" value="45" oninput="document.getElementById('val-image-opacity').textContent=this.value+'%';state.imageOpacity=this.value/100;render()">
       </div>
     </div>
     <div class="section" id="icon-control-section">
@@ -572,8 +544,29 @@
       <input type="range" class="slider" id="slider-icon-x" min="0" max="100" step="1" value="50" oninput="document.getElementById('val-icon-x').textContent=this.value+'%';render()">
       <div class="control-row"><span class="control-label" data-i18n="iconY">垂直位置</span><span class="control-value" id="val-icon-y">50%</span></div>
       <input type="range" class="slider" id="slider-icon-y" min="0" max="100" step="1" value="50" oninput="document.getElementById('val-icon-y').textContent=this.value+'%';render()">
-      <div class="control-row"><span class="control-label" data-i18n="iconOpacity">图标透明度</span><span class="control-value" id="val-icon-opacity">12%</span></div>
-      <input type="range" class="slider" id="slider-icon-opacity" min="3" max="50" step="1" value="12" oninput="document.getElementById('val-icon-opacity').textContent=this.value+'%';render()">
+      <div class="control-row"><span class="control-label" data-i18n="iconOpacity">图标透明度</span><span class="control-value" id="val-icon-opacity">45%</span></div>
+      <input type="range" class="slider" id="slider-icon-opacity" min="10" max="80" step="1" value="45" oninput="document.getElementById('val-icon-opacity').textContent=this.value+'%';render()">
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-label" data-i18n="decoSection">房间装饰</div>
+      <div class="toggle-row"><span class="control-label" data-i18n="deco">房间装饰</span><div class="toggle" id="toggle-deco" onclick="toggleEffect('deco')"><div class="toggle-thumb"></div></div></div>
+      <div id="deco-settings" style="display:none;padding:8px 0 4px">
+        <div class="control-row"><span class="control-label" data-i18n="decoCount">贴纸数量</span><span class="control-value" id="val-deco-count">14</span></div>
+        <input type="range" class="slider" id="slider-deco-count" min="4" max="50" value="14">
+        <div class="control-row"><span class="control-label" data-i18n="decoSizeMin">最小尺寸</span><span class="control-value" id="val-deco-size-min">24px</span></div>
+        <input type="range" class="slider" id="slider-deco-size-min" min="10" max="60" value="24">
+        <div class="control-row"><span class="control-label" data-i18n="decoSizeMax">最大尺寸</span><span class="control-value" id="val-deco-size-max">80px</span></div>
+        <input type="range" class="slider" id="slider-deco-size-max" min="30" max="140" value="80">
+        <div class="control-row"><span class="control-label" data-i18n="decoOpacity">贴纸透明度</span><span class="control-value" id="val-deco-opacity">45%</span></div>
+        <input type="range" class="slider" id="slider-deco-opacity" min="10" max="80" value="45">
+        <div class="control-row" style="margin-top:4px"><span class="control-label" data-i18n="decoBlend">混个模式</span></div>
+        <div id="select-deco-blend" class="blend-tabs" style="display:flex;gap:3px;background:var(--surface2);border-radius:var(--radius-sm);padding:3px;margin-bottom:4px">
+          <button class="blend-tab active" data-value="source-over" onclick="setBlendMode(this)">Normal</button>
+          <button class="blend-tab" data-value="screen" onclick="setBlendMode(this)">Screen</button>
+          <button class="blend-tab" data-value="overlay" onclick="setBlendMode(this)">Overlay</button>
+          <button class="blend-tab" data-value="soft-light" onclick="setBlendMode(this)">Soft</button>
+        </div>
       </div>
     </div>
     <div class="section">
@@ -646,7 +639,7 @@ const state = {
     { color: '#F58B8B', pos: 0.75 },
     { color: '#C26DAD', pos: 1 }
   ],
-  effects: { noise: false, vignette: false, bloom: true, icon: false, deco: false, image: false },
+  effects: { noise: false, vignette: false, brightness: false, bloom: true, icon: false, deco: false, image: false },
   overlay: 'none',
   canvasW: 1290,
   canvasH: 2796,
@@ -654,29 +647,35 @@ const state = {
   iconSize: 15,
   iconX: 50,
   iconY: 50,
-  iconOpacity: 12,
+  iconOpacity: 45,
   customIcon: null,
   decoCount: 14,
   decoSizeMin: 24,
   decoSizeMax: 80,
-  decoOpacity: 0.72,
+  decoOpacity: 0.45,
   decoBlend: 'source-over',
   _decoCache: null,
   // 插入图片
   image: null,
   imageSrc: null,
   imageScale: 0.5,
-  imageX: 0.5,
-  imageY: 0.5,
-  imageOpacity: 0.8,
-  imageOverlayColor: '#6366f1',
-  imageCoverage: 0.5,
-  zoomScale: 1
+  imageX: 1,
+  imageY: 0,
+  imageOpacity: 0.45,
+  zoomScale: 1,
+  brightnessIntensity: 0
 };
 
 // 国际化
 let lang = localStorage.getItem('wallpaper-lang') || 'zh';
 let starSeed = 0;
+let lightBeamSeed = 0;
+let lightOrbSeed = 0;
+let dualOrbSeed = 0;
+let auroraSeed = 0;
+let vaporSeed = 0;
+let lensSeed = 0;
+let sunsetSeed = 0;
 const I18N = {
   zh: {
     title: 'HomeKit 墙纸设计器',
@@ -696,6 +695,8 @@ const I18N = {
     noiseIntensity: '噪点强度',
     vignette: '暗角效果',
     vignetteIntensity: '暗角强度',
+    brightness: '整体亮度',
+    brightnessIntensity: '亮度强度',
     decoSection: '房间装饰',
     deco: '房间装饰',
     decoCount: '贴纸数量',
@@ -706,14 +707,13 @@ const I18N = {
     bloom: '柔和光晕',
     roomIcon: '房间图标',
     showIcon: '显示图标',
-    insertImage: '插入图片',
+    insertImage: '房间图片',
     showImage: '显示图片',
     imgScale: '图片缩放',
     imgX: '水平位置',
     imgY: '垂直位置',
     imgOpacity: '图片透明度',
-    imgOverlayColor: '叠加颜色',
-    imgCoverage: '叠加范围',
+    selectImage: '📷 选择图片',
     iconSize: '图标大小',
     iconX: '水平位置',
     iconY: '垂直位置',
@@ -758,6 +758,8 @@ const I18N = {
     noiseIntensity: 'Noise Intensity',
     vignette: 'Vignette',
     vignetteIntensity: 'Vignette Intensity',
+    brightness: 'Overall Brightness',
+    brightnessIntensity: 'Brightness Intensity',
     decoSection: 'Room Decor',
     deco: 'Room Decor',
     decoCount: 'Sticker Count',
@@ -768,14 +770,13 @@ const I18N = {
     bloom: 'Soft Bloom',
     roomIcon: 'Room Icon',
     showIcon: 'Show Icon',
-    insertImage: 'Insert Image',
+    insertImage: 'Room Image',
     showImage: 'Show Image',
     imgScale: 'Image Scale',
     imgX: 'Horizontal Position',
     imgY: 'Vertical Position',
     imgOpacity: 'Image Opacity',
-    imgOverlayColor: 'Overlay Color',
-    imgCoverage: 'Coverage',
+    selectImage: '📷 Select Image',
     iconSize: 'Icon Size',
     iconX: 'Horizontal Position',
     iconY: 'Vertical Position',
@@ -799,7 +800,7 @@ const I18N = {
     dirLabels: { '0': 'Up', '45': 'Up-Right', '90': 'Right', '135': 'Down-Right', '180': 'Down', '225': 'Down-Left', '270': 'Left', '315': 'Up-Left' },
     stops: ' stops',
     exportFormat: 'Format',
-    engine: 'v1.3 · Gradient Engine · by:Zan',
+    engine: 'v1.29 · Gradient Engine · by:Zan',
     sizes: { 'iphone15pro': 'iPhone 15 Pro', 'iphone15': 'iPhone 15', 'iphone16pro': 'iPhone 16 Pro', 'iphone16': 'iPhone 16', 'iphone17pro': 'iPhone 17 Pro', 'iphone17': 'iPhone 17', 'iphone14promax': 'iPhone 14 Pro Max', 'iphone14': 'iPhone 14', 'ipadsquare': 'iPad Square', 'ipadpro': 'iPad Pro', 'desktop': 'Desktop' }
   }
 };
@@ -826,10 +827,10 @@ const OVERLAYS = [
   { id: 'lightBeam', nameKey: 'lightBeam', preview: 'linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 50%)' },
   { id: 'lightOrb', nameKey: 'lightOrb', preview: 'radial-gradient(circle at 50% 35%, rgba(255,250,240,0.5) 0%, rgba(255,240,220,0.2) 30%, transparent 70%)' },
   { id: 'dualOrb', nameKey: 'dualOrb', preview: 'radial-gradient(circle at 30% 40%, rgba(180,100,255,0.3) 0%, transparent 40%), radial-gradient(circle at 70% 60%, rgba(100,200,255,0.25) 0%, transparent 40%)' },
-  { id: 'aurora', nameKey: 'aurora', preview: 'linear-gradient(180deg, transparent 30%, rgba(100,255,200,0.15) 50%, transparent 70%)' },
+  { id: 'aurora', nameKey: 'aurora', preview: 'radial-gradient(circle at 50% 40%, rgba(150,100,255,0.4) 0%, rgba(120,150,255,0.2) 30%, transparent 70%)' },
   { id: 'star', nameKey: 'star', preview: 'radial-gradient(circle at 20% 30%, rgba(255,255,255,0.3) 0%, transparent 3%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.25) 0%, transparent 2%)' },
   { id: 'lens', nameKey: 'lens', preview: 'radial-gradient(circle at 50% 20%, rgba(255,255,255,0.35) 0%, transparent 30%)' },
-  { id: 'vapor', nameKey: 'vapor', preview: 'linear-gradient(45deg, rgba(255,100,180,0.1) 0%, rgba(100,180,255,0.1) 100%)' },
+  { id: 'vapor', nameKey: 'vapor', preview: 'radial-gradient(circle at 60% 45%, rgba(255,120,180,0.3) 0%, rgba(255,150,120,0.15) 30%, transparent 60%)' },
   { id: 'sunset', nameKey: 'sunset', preview: 'radial-gradient(ellipse at 80% 80%, rgba(255,150,100,0.2) 0%, transparent 50%)' },
 ];
 
@@ -1127,6 +1128,13 @@ function initOverlays() {
 function selectOverlay(id) {
   state.overlay = id;
   if (id === 'star') starSeed = Math.random() * 9999;
+  if (id === 'lightBeam') lightBeamSeed = Math.random() * 9999;
+  if (id === 'lightOrb') lightOrbSeed = Math.random() * 9999;
+  if (id === 'dualOrb') dualOrbSeed = Math.random() * 9999;
+  if (id === 'aurora') auroraSeed = Math.random() * 9999;
+  if (id === 'vapor') vaporSeed = Math.random() * 9999;
+  if (id === 'lens') lensSeed = Math.random() * 9999;
+  if (id === 'sunset') sunsetSeed = Math.random() * 9999;
   document.querySelectorAll('.overlay-btn').forEach(b => b.classList.toggle('active', b.dataset.overlay === id));
   render();
 }
@@ -1225,6 +1233,16 @@ function blendColors(c1, c2) {
   return '#' + Math.round((r1+r2)/2).toString(16).padStart(2,'0') + Math.round((g1+g2)/2).toString(16).padStart(2,'0') + Math.round((b1+b2)/2).toString(16).padStart(2,'0');
 }
 
+function hexToRgb(hex) {
+  const clean = hex.replace('#', '');
+  const bigint = parseInt(clean, 16);
+  return [
+    (bigint >> 16) & 255,
+    (bigint >> 8) & 255,
+    bigint & 255
+  ];
+}
+
 document.getElementById('type-tabs').addEventListener('click', e => {
   const btn = e.target.closest('.type-tab');
   if (!btn) return;
@@ -1307,10 +1325,18 @@ document.getElementById('icon-upload').addEventListener('change', e => {
 
 // 同步切换按钮状态
 document.getElementById('toggle-vignette').classList.toggle('on', state.effects.vignette);
+document.getElementById('toggle-noise').classList.toggle('on', state.effects.noise);
+document.getElementById('toggle-brightness').classList.toggle('on', state.effects.brightness);
 document.getElementById('toggle-icon').classList.toggle('on', state.effects.icon);
 document.getElementById('toggle-deco').classList.toggle('on', state.effects.deco);
 document.getElementById('deco-settings').style.display = state.effects.deco ? '' : 'none';
 document.getElementById('icon-settings').style.display = state.effects.icon ? '' : 'none';
+document.getElementById('noise-intensity-row').style.display = state.effects.noise ? '' : 'none';
+document.getElementById('slider-noise').style.display = state.effects.noise ? '' : 'none';
+document.getElementById('vignette-intensity-row').style.display = state.effects.vignette ? '' : 'none';
+document.getElementById('slider-vignette').style.display = state.effects.vignette ? '' : 'none';
+document.getElementById('brightness-intensity-row').style.display = state.effects.brightness ? '' : 'none';
+document.getElementById('slider-brightness').style.display = state.effects.brightness ? '' : 'none';
 
 document.getElementById('size-selector').addEventListener('click', e => {
   const btn = e.target.closest('.size-btn');
@@ -1399,6 +1425,18 @@ function toggleEffect(name) {
   if (name === 'icon') document.getElementById('icon-settings').style.display = state.effects.icon ? '' : 'none';
   if (name === 'deco') document.getElementById('deco-settings').style.display = state.effects.deco ? '' : 'none';
   if (name === 'image') document.getElementById('image-settings').style.display = state.effects.image ? '' : 'none';
+  if (name === 'noise') {
+    document.getElementById('noise-intensity-row').style.display = state.effects.noise ? '' : 'none';
+    document.getElementById('slider-noise').style.display = state.effects.noise ? '' : 'none';
+  }
+  if (name === 'vignette') {
+    document.getElementById('vignette-intensity-row').style.display = state.effects.vignette ? '' : 'none';
+    document.getElementById('slider-vignette').style.display = state.effects.vignette ? '' : 'none';
+  }
+  if (name === 'brightness') {
+    document.getElementById('brightness-intensity-row').style.display = state.effects.brightness ? '' : 'none';
+    document.getElementById('slider-brightness').style.display = state.effects.brightness ? '' : 'none';
+  }
   render();
 }
 
@@ -1426,6 +1464,11 @@ function render() {
   if (state.effects.deco) drawRoomDeco(W, H);
   if (state.effects.image && state.image) drawInsertedImage(W, H);
   if (state.effects.icon) drawRoomIcon(W, H);
+  
+  // 应用整体亮度调整
+  if (state.effects.brightness && state.brightnessIntensity !== 0) {
+    applyBrightnessAdjustment(W, H);
+  }
 }
 
 function angleToVector(deg) { const rad = (deg - 90) * Math.PI / 180; return { x: Math.cos(rad), y: Math.sin(rad) }; }
@@ -1506,68 +1549,91 @@ function drawMesh(W, H) {
 }
 
 function drawOverlayEffect(W, H) {
+  // 通用随机函数
+  const rng = (s, seed) => { s = Math.sin(s + seed) * 43758.5453; return s - Math.floor(s); };
+
   if (state.overlay === 'lightBeam') {
     const angle = state.angle * Math.PI / 180;
     const cx = W * 0.5, cy = H * 0.5;
+    // 使用种子添加随机偏移
+    const randomOffset = rng(0, lightBeamSeed) * 0.3 - 0.15; // -0.15 到 0.15
+    const intensity = 0.08 + rng(1, lightBeamSeed) * 0.07; // 0.08 到 0.15
     for (let i = 0; i < 3; i++) {
-      const offset = (i - 1) * W * 0.2;
+      const offset = (i - 1) * W * (0.15 + randomOffset);
       const x1 = cx - Math.cos(angle) * W + offset, y1 = cy - Math.sin(angle) * H;
       const x2 = cx + Math.cos(angle) * W + offset, y2 = cy + Math.sin(angle) * H;
       const grad = ctx.createLinearGradient(x1, y1, x2, y2);
       grad.addColorStop(0, 'transparent');
-      grad.addColorStop(0.4, 'rgba(255,255,255,0.08)');
-      grad.addColorStop(0.5, 'rgba(255,255,255,0.15)');
-      grad.addColorStop(0.6, 'rgba(255,255,255,0.08)');
+      grad.addColorStop(0.4, 'rgba(255,255,255,' + intensity + ')');
+      grad.addColorStop(0.5, 'rgba(255,255,255,' + (intensity * 1.5) + ')');
+      grad.addColorStop(0.6, 'rgba(255,255,255,' + intensity + ')');
       grad.addColorStop(1, 'transparent');
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, W, H);
     }
   } else if (state.overlay === 'lightOrb') {
     // 大面积柔光球 - 居中偏上，带暖色调
-    const cx = W * 0.5, cy = H * 0.35, r = Math.max(W, H) * 0.85;
+    const baseX = 0.5, baseY = 0.35;
+    const randomX = rng(2, lightOrbSeed) * 0.2 - 0.1; // -0.1 到 0.1
+    const randomY = rng(3, lightOrbSeed) * 0.15 - 0.075; // -0.075 到 0.075
+    const cx = W * (baseX + randomX), cy = H * (baseY + randomY);
+    const r = Math.max(W, H) * (0.75 + rng(4, lightOrbSeed) * 0.2); // 0.75-0.95
+    const intensity = 0.25 + rng(5, lightOrbSeed) * 0.15; // 0.25-0.4
     const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-    grad.addColorStop(0, 'rgba(255,250,240,0.35)');
-    grad.addColorStop(0.1, 'rgba(255,245,230,0.25)');
-    grad.addColorStop(0.25, 'rgba(255,240,220,0.15)');
-    grad.addColorStop(0.4, 'rgba(255,235,215,0.08)');
-    grad.addColorStop(0.6, 'rgba(255,230,210,0.03)');
+    grad.addColorStop(0, 'rgba(255,250,240,' + intensity + ')');
+    grad.addColorStop(0.1, 'rgba(255,245,230,' + (intensity * 0.7) + ')');
+    grad.addColorStop(0.25, 'rgba(255,240,220,' + (intensity * 0.4) + ')');
+    grad.addColorStop(0.4, 'rgba(255,235,215,' + (intensity * 0.2) + ')');
+    grad.addColorStop(0.6, 'rgba(255,230,210,' + (intensity * 0.08) + ')');
     grad.addColorStop(1, 'transparent');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, W, H);
   } else if (state.overlay === 'dualOrb') {
-    const cx1 = W * 0.3, cy1 = H * 0.35, r1 = Math.max(W, H) * 0.5;
+    // 第一个球的随机位置和大小
+    const baseX1 = 0.3, baseY1 = 0.35;
+    const randomX1 = rng(6, dualOrbSeed) * 0.2 - 0.1;
+    const randomY1 = rng(7, dualOrbSeed) * 0.15 - 0.075;
+    const cx1 = W * (baseX1 + randomX1), cy1 = H * (baseY1 + randomY1);
+    const r1 = Math.max(W, H) * (0.4 + rng(8, dualOrbSeed) * 0.2);
+    const intensity1 = 0.15 + rng(9, dualOrbSeed) * 0.1;
     const grad1 = ctx.createRadialGradient(cx1, cy1, 0, cx1, cy1, r1);
-    grad1.addColorStop(0, 'rgba(180,120,255,0.2)');
-    grad1.addColorStop(0.2, 'rgba(160,100,240,0.1)');
-    grad1.addColorStop(0.5, 'rgba(100,80,200,0.03)');
+    grad1.addColorStop(0, 'rgba(180,120,255,' + intensity1 + ')');
+    grad1.addColorStop(0.2, 'rgba(160,100,240,' + (intensity1 * 0.5) + ')');
+    grad1.addColorStop(0.5, 'rgba(100,80,200,' + (intensity1 * 0.15) + ')');
     grad1.addColorStop(1, 'transparent');
     ctx.fillStyle = grad1;
     ctx.fillRect(0, 0, W, H);
-    const cx2 = W * 0.7, cy2 = H * 0.65, r2 = Math.max(W, H) * 0.45;
+    
+    // 第二个球的随机位置和大小
+    const baseX2 = 0.7, baseY2 = 0.65;
+    const randomX2 = rng(10, dualOrbSeed) * 0.2 - 0.1;
+    const randomY2 = rng(11, dualOrbSeed) * 0.15 - 0.075;
+    const cx2 = W * (baseX2 + randomX2), cy2 = H * (baseY2 + randomY2);
+    const r2 = Math.max(W, H) * (0.35 + rng(12, dualOrbSeed) * 0.2);
+    const intensity2 = 0.12 + rng(13, dualOrbSeed) * 0.08;
     const grad2 = ctx.createRadialGradient(cx2, cy2, 0, cx2, cy2, r2);
-    grad2.addColorStop(0, 'rgba(100,200,255,0.18)');
-    grad2.addColorStop(0.2, 'rgba(80,180,240,0.08)');
-    grad2.addColorStop(0.5, 'rgba(60,150,220,0.02)');
+    grad2.addColorStop(0, 'rgba(100,200,255,' + intensity2 + ')');
+    grad2.addColorStop(0.2, 'rgba(80,180,240,' + (intensity2 * 0.4) + ')');
+    grad2.addColorStop(0.5, 'rgba(60,150,220,' + (intensity2 * 0.1) + ')');
     grad2.addColorStop(1, 'transparent');
     ctx.fillStyle = grad2;
     ctx.fillRect(0, 0, W, H);
   } else if (state.overlay === 'aurora') {
-    for (let i = 0; i < 5; i++) {
-      const yBase = H * (0.25 + i * 0.1);
-      const alpha = 0.08 - i * 0.012;
-      ctx.beginPath();
-      ctx.moveTo(0, yBase);
-      for (let x = 0; x <= W; x += 10) ctx.lineTo(x, yBase + Math.sin((x / W) * Math.PI * 3 + i) * H * 0.03);
-      ctx.lineTo(W, yBase + H * 0.15);
-      ctx.lineTo(0, yBase + H * 0.15);
-      ctx.closePath();
-      const grad = ctx.createLinearGradient(0, yBase, 0, yBase + H * 0.15);
-      grad.addColorStop(0, 'rgba(100,255,200,'+alpha+')');
-      grad.addColorStop(0.5, 'rgba(80,200,180,'+(alpha*0.5)+')');
-      grad.addColorStop(1, 'transparent');
-      ctx.fillStyle = grad;
-      ctx.fill();
-    }
+    // 简化为紫蓝色柔光球效果，添加随机性
+    const baseX = 0.5, baseY = 0.4;
+    const randomX = rng(14, auroraSeed) * 0.3 - 0.15;
+    const randomY = rng(15, auroraSeed) * 0.2 - 0.1;
+    const cx = W * (baseX + randomX), cy = H * (baseY + randomY);
+    const r = Math.max(W, H) * (0.7 + rng(16, auroraSeed) * 0.2);
+    const intensity = 0.2 + rng(17, auroraSeed) * 0.1;
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grad.addColorStop(0, 'rgba(150,100,255,' + intensity + ')');
+    grad.addColorStop(0.2, 'rgba(120,150,255,' + (intensity * 0.6) + ')');
+    grad.addColorStop(0.4, 'rgba(100,180,255,' + (intensity * 0.32) + ')');
+    grad.addColorStop(0.6, 'rgba(80,200,240,' + (intensity * 0.12) + ')');
+    grad.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
   } else if (state.overlay === 'star') {
     const rng = s => { s = Math.sin(s) * 43758.5453; return s - Math.floor(s); };
     const t = Date.now() * 0.001;
@@ -1612,16 +1678,21 @@ function drawOverlayEffect(W, H) {
     });
     ctx.globalAlpha = 1;
   } else if (state.overlay === 'lens') {
-    const cx = W * 0.5, cy = H * 0.15, r = Math.min(W, H) * 0.4;
+    const baseX = 0.5, baseY = 0.15;
+    const randomX = rng(22, lensSeed) * 0.2 - 0.1;
+    const randomY = rng(23, lensSeed) * 0.1 - 0.05;
+    const cx = W * (baseX + randomX), cy = H * (baseY + randomY);
+    const r = Math.min(W, H) * (0.3 + rng(24, lensSeed) * 0.2);
+    const intensity = 0.2 + rng(25, lensSeed) * 0.15;
     const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-    grad.addColorStop(0, 'rgba(255,255,255,0.3)');
-    grad.addColorStop(0.2, 'rgba(255,255,255,0.15)');
-    grad.addColorStop(0.5, 'rgba(255,255,255,0.05)');
+    grad.addColorStop(0, 'rgba(255,255,255,' + intensity + ')');
+    grad.addColorStop(0.2, 'rgba(255,255,255,' + (intensity * 0.5) + ')');
+    grad.addColorStop(0.5, 'rgba(255,255,255,' + (intensity * 0.15) + ')');
     grad.addColorStop(1, 'transparent');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, W, H);
     ctx.save();
-    ctx.globalAlpha = 0.1;
+    ctx.globalAlpha = 0.08 + rng(26, lensSeed) * 0.04;
     ctx.strokeStyle = 'white';
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -1632,25 +1703,32 @@ function drawOverlayEffect(W, H) {
     ctx.stroke();
     ctx.restore();
   } else if (state.overlay === 'vapor') {
-    const grad = ctx.createLinearGradient(0, 0, W, H);
-    grad.addColorStop(0, 'rgba(255,100,180,0.08)');
-    grad.addColorStop(0.3, 'rgba(200,100,255,0.05)');
-    grad.addColorStop(0.6, 'rgba(100,200,255,0.06)');
-    grad.addColorStop(1, 'rgba(255,150,100,0.08)');
+    // 简化为粉橙色柔光球效果，添加随机性
+    const baseX = 0.6, baseY = 0.45;
+    const randomX = rng(18, vaporSeed) * 0.3 - 0.15;
+    const randomY = rng(19, vaporSeed) * 0.2 - 0.1;
+    const cx = W * (baseX + randomX), cy = H * (baseY + randomY);
+    const r = Math.max(W, H) * (0.6 + rng(20, vaporSeed) * 0.2);
+    const intensity = 0.15 + rng(21, vaporSeed) * 0.1;
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grad.addColorStop(0, 'rgba(255,120,180,' + intensity + ')');
+    grad.addColorStop(0.2, 'rgba(255,150,120,' + (intensity * 0.6) + ')');
+    grad.addColorStop(0.4, 'rgba(255,180,100,' + (intensity * 0.3) + ')');
+    grad.addColorStop(0.6, 'rgba(255,200,80,' + (intensity * 0.1) + ')');
+    grad.addColorStop(1, 'transparent');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, W, H);
-    ctx.save();
-    ctx.globalAlpha = 0.03;
-    ctx.strokeStyle = 'white';
-    ctx.lineWidth = 1;
-    for (let y = 0; y < H; y += 4) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
-    ctx.restore();
   } else if (state.overlay === 'sunset') {
-    const cx = W * 0.8, cy = H * 0.85, r = Math.max(W, H) * 0.7;
+    const baseX = 0.8, baseY = 0.85;
+    const randomX = rng(27, sunsetSeed) * 0.2 - 0.1;
+    const randomY = rng(28, sunsetSeed) * 0.1 - 0.05;
+    const cx = W * (baseX + randomX), cy = H * (baseY + randomY);
+    const r = Math.max(W, H) * (0.6 + rng(29, sunsetSeed) * 0.2);
+    const intensity = 0.15 + rng(30, sunsetSeed) * 0.1;
     const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-    grad.addColorStop(0, 'rgba(255,180,100,0.2)');
-    grad.addColorStop(0.3, 'rgba(255,140,80,0.1)');
-    grad.addColorStop(0.6, 'rgba(255,100,60,0.04)');
+    grad.addColorStop(0, 'rgba(255,180,100,' + intensity + ')');
+    grad.addColorStop(0.3, 'rgba(255,140,80,' + (intensity * 0.5) + ')');
+    grad.addColorStop(0.6, 'rgba(255,100,60,' + (intensity * 0.2) + ')');
     grad.addColorStop(1, 'transparent');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, W, H);
@@ -1730,6 +1808,27 @@ function drawRoomIcon(W, H) {
   ctx.restore();
 }
 
+function applyBrightnessAdjustment(W, H) {
+  const intensity = state.brightnessIntensity;
+  if (intensity === 0) return;
+  
+  const imageData = ctx.getImageData(0, 0, W, H);
+  const data = imageData.data;
+  
+  // 亮度调整：正值增加亮度，负值减少亮度
+  const factor = 1 + intensity;
+  
+  for (let i = 0; i < data.length; i += 4) {
+    // 调整RGB通道
+    data[i] = Math.max(0, Math.min(255, data[i] * factor));     // R
+    data[i + 1] = Math.max(0, Math.min(255, data[i + 1] * factor)); // G
+    data[i + 2] = Math.max(0, Math.min(255, data[i + 2] * factor)); // B
+    // Alpha通道保持不变
+  }
+  
+  ctx.putImageData(imageData, 0, 0);
+}
+
 // ── 房间装饰贴纸 ──
 function drawRoomDeco(W, H) {
   const room = state.room;
@@ -1795,9 +1894,7 @@ function drawRoomDeco(W, H) {
 function drawInsertedImage(W, H) {
   const img = state.image;
   if (!img) return;
-  
-  ctx.save();
-  
+
   // 计算图片尺寸（保持宽高比）
   const scale = state.imageScale || 0.5;
   const imgRatio = img.width / img.height;
@@ -1807,45 +1904,48 @@ function drawInsertedImage(W, H) {
     drawH = H * scale;
     drawW = drawH * imgRatio;
   }
-  
-  // 计算位置
-  const x = W * (state.imageX || 0.5) - drawW / 2;
-  const y = H * (state.imageY || 0.5) - drawH / 2;
-  
-  // === 底层：绘制图片 ===
-  ctx.globalAlpha = state.imageOpacity || 0.8;
-  ctx.drawImage(img, x, y, drawW, drawH);
-  
-  // === 叠加层：颜色从左下角向外渐变覆盖 ===
-  const coverage = state.imageCoverage || 0;
-  if (coverage > 0) {
-    const overlayColor = state.imageOverlayColor || '#6366f1';
-    const opacity = state.imageOpacity || 0.8;
-    
-    const r = parseInt(overlayColor.slice(1,3), 16);
-    const g = parseInt(overlayColor.slice(3,5), 16);
-    const b = parseInt(overlayColor.slice(5,7), 16);
-    
-    // 左下角坐标
-    const cx = x;
-    const cy = y + drawH;
-    
-    // 覆盖半径：coverage * 图片对角线长度
-    const diagonal = Math.sqrt(drawW * drawW + drawH * drawH);
-    const radius = diagonal * coverage;
-    
-    // 径向渐变：从左下角往外，颜色渐变到透明
-    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
-    grad.addColorStop(0, `rgba(${r},${g},${b},${opacity})`);
-    grad.addColorStop(0.7, `rgba(${r},${g},${b},${opacity * 0.6})`);
-    grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
-    
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = grad;
-    // 填充一个覆盖整张图片的矩形
-    ctx.fillRect(x, y, drawW, drawH);
-  }
-  
+
+  // 将图片保持在右上象限，并允许用户通过滑块微调
+  const xRight = W - drawW;
+  const shiftX = Math.min(W * 0.35, xRight);
+  const maxY = Math.max(0, H - drawH);
+  const shiftY = Math.min(H * 0.25, maxY);
+  const posX = state.imageX || 0;
+  const posY = state.imageY || 0;
+  const x = xRight - (1 - posX) * shiftX;
+  const y = posY * shiftY;
+
+  const tempCanvas = document.createElement('canvas');
+  tempCanvas.width = Math.max(1, Math.round(drawW));
+  tempCanvas.height = Math.max(1, Math.round(drawH));
+  const tempCtx = tempCanvas.getContext('2d');
+
+  tempCtx.globalAlpha = state.imageOpacity || 0.8;
+  tempCtx.drawImage(img, 0, 0, drawW, drawH);
+
+  const maskGrad = tempCtx.createLinearGradient(0, tempCanvas.height, tempCanvas.width, 0);
+  maskGrad.addColorStop(0, 'rgba(0,0,0,0)');
+  maskGrad.addColorStop(0.35, 'rgba(0,0,0,0)');
+  maskGrad.addColorStop(0.75, 'rgba(0,0,0,0.75)');
+  maskGrad.addColorStop(1, 'rgba(0,0,0,1)');
+  tempCtx.globalCompositeOperation = 'destination-in';
+  tempCtx.fillStyle = maskGrad;
+  tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+  // 先绘制图片并遮罩到主画布
+  ctx.save();
+  ctx.drawImage(tempCanvas, x, y, drawW, drawH);
+
+  // 左下角渐变色温统一
+  const topColor = state.stops[0]?.color || '#ffffff';
+  const [tr, tg, tb] = hexToRgb(topColor);
+  ctx.globalCompositeOperation = 'soft-light';
+  const tintGrad = ctx.createLinearGradient(x, y, x, y + drawH);
+  tintGrad.addColorStop(0, `rgba(${tr},${tg},${tb},0.22)`);
+  tintGrad.addColorStop(0.35, `rgba(${tr},${tg},${tb},0.12)`);
+  tintGrad.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = tintGrad;
+  ctx.fillRect(x, y, drawW, drawH);
   ctx.restore();
 }
 
@@ -1990,6 +2090,12 @@ function updateLanguage() {
   document.querySelectorAll('label[data-i18n]').forEach(el => {
     if (el.dataset.i18n) el.textContent = t(el.dataset.i18n);
   });
+  // Select button and generic translatable elements
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    if (!['INPUT','TEXTAREA','SELECT','OPTION'].includes(el.tagName) && el.dataset.i18n) {
+      el.textContent = t(el.dataset.i18n);
+    }
+  });
   // Deco settings - blend mode buttons
   if (document.getElementById('deco-settings')) {
     document.querySelectorAll('.blend-tab').forEach(btn => {
@@ -2081,6 +2187,7 @@ function syncZoomToFit() {
   state.zoomScale = ZOOM_STOPS[renderIdx];  // Render at full fit (>= 100%)
   zoomPct.textContent = Math.round(fitRatio * 100) + '%';
   _syncingZoom = false;
+  render();
 }
 
 // Update zoom display on window resize (debounced)
