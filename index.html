@@ -1366,6 +1366,25 @@ zoomSlider.addEventListener('input', () => {
   render();
 });
 
+    // 画布区域鼠标滚轮缩放
+    document.querySelector('.canvas-wrapper').addEventListener('wheel', function(e) {
+      e.preventDefault();
+      if (_syncingZoom) return;
+      var idx = parseInt(zoomSlider.value);
+      if (e.deltaY < 0) { idx = Math.min(idx + 1, ZOOM_STOPS.length - 1); }
+      else { idx = Math.max(idx - 1, 0); }
+      if (idx === parseInt(zoomSlider.value)) return;
+      zoomSlider.value = idx;
+      state.zoomScale = ZOOM_STOPS[idx];
+      const wrapper = document.querySelector('.canvas-wrapper');
+      if (wrapper) {
+        const maxW = wrapper.clientWidth - 48, maxH = wrapper.clientHeight - 48;
+        const fitRatio = Math.min(maxW / state.canvasW, maxH / state.canvasH, 1);
+        zoomPct.textContent = Math.round(fitRatio * state.zoomScale * 100) + '%';
+      }
+      render();
+    }, { passive: false });
+
     // 装饰贴纸控制
     document.getElementById('slider-deco-count').oninput = function() {
       var v = parseInt(this.value); document.getElementById('val-deco-count').textContent = v; state.decoCount = v; render();
