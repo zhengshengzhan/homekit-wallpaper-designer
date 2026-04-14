@@ -152,8 +152,12 @@
   .header-meta { font-size: 11px; color: var(--text-dim); letter-spacing: 0; }
   .coffee-btn { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-dim);
     padding: 3px 8px; border-radius: 6px; border: none; background: none; cursor: pointer;
-    transition: background 0.15s var(--ease), color 0.15s var(--ease); position: relative; white-space: nowrap; }
+    transition: background 0.15s var(--ease), color 0.15s var(--ease); position: relative; white-space: nowrap; overflow: hidden; }
   .coffee-btn:hover { background: var(--surface2); color: var(--text); }
+  .coffee-btn > span { position: relative; z-index: 1; background: linear-gradient(90deg, var(--text-dim) 0%, var(--text-dim) 40%, var(--accent) 50%, var(--text-dim) 60%, var(--text-dim) 100%);
+    background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    animation: coffee-shimmer 3s ease-in-out infinite; }
+  @keyframes coffee-shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
   .coffee-btn .coffee-popup { display: none; position: absolute; top: calc(100% + 8px); right: 0; z-index: 100;
     background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
     padding: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); width: 180px; }
