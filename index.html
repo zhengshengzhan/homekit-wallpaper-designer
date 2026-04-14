@@ -129,7 +129,7 @@
   [data-theme="light"] .logo-ring::after {
     background: radial-gradient(circle, rgba(124,58,237,0.4) 0%, transparent 70%);
   }
-  .logo-text { display: flex; flex-direction: column; line-height: 1.15; padding: 0 16px; }
+  .logo-text { display: flex; flex-direction: column; line-height: 1.15; padding: 0 8px; }
   .logo-text span:first-child {
     font-size: 16px;
     font-weight: 800;
@@ -551,9 +551,9 @@
         <div class="control-row"><span class="control-label" data-i18n="imgScale">图片缩放</span><span class="control-value" id="val-image-scale">50%</span></div>
         <input type="range" class="slider" id="slider-image-scale" min="10" max="200" step="5" value="50" oninput="document.getElementById('val-image-scale').textContent=this.value+'%';state.imageScale=this.value/100;render()">
         <div class="control-row"><span class="control-label" data-i18n="imgX">水平位置</span><span class="control-value" id="val-image-x">100%</span></div>
-        <input type="range" class="slider" id="slider-image-x" min="0" max="100" step="1" value="100" oninput="document.getElementById('val-image-x').textContent=this.value+'%';state.imageX=this.value/100;render()">
+        <input type="range" class="slider" id="slider-image-x" min="-50" max="150" step="1" value="100" oninput="document.getElementById('val-image-x').textContent=this.value+'%';state.imageX=this.value/100;render()">
         <div class="control-row"><span class="control-label" data-i18n="imgY">垂直位置</span><span class="control-value" id="val-image-y">0%</span></div>
-        <input type="range" class="slider" id="slider-image-y" min="0" max="100" step="1" value="0" oninput="document.getElementById('val-image-y').textContent=this.value+'%';state.imageY=this.value/100;render()">
+        <input type="range" class="slider" id="slider-image-y" min="-50" max="150" step="1" value="0" oninput="document.getElementById('val-image-y').textContent=this.value+'%';state.imageY=this.value/100;render()">
         <div class="control-row"><span class="control-label" data-i18n="imgOpacity">图片透明度</span><span class="control-value" id="val-image-opacity">45%</span></div>
         <input type="range" class="slider" id="slider-image-opacity" min="10" max="80" step="5" value="45" oninput="document.getElementById('val-image-opacity').textContent=this.value+'%';state.imageOpacity=this.value/100;render()">
       </div>
