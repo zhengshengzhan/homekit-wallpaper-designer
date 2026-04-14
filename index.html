@@ -128,15 +128,18 @@
   [data-theme="light"] .logo-ring::after {
     background: radial-gradient(circle, rgba(124,58,237,0.4) 0%, transparent 70%);
   }
-  .logo-text { display: flex; flex-direction: column; line-height: 1.15; }
+  .logo-text { display: flex; flex-direction: column; line-height: 1.15; padding: 0 6px; }
   .logo-text span:first-child {
     font-size: 14px;
     font-weight: 800;
-    background: linear-gradient(135deg, #a855f7, #ec4899);
+    background: linear-gradient(90deg, #a855f7, #ec4899, #a855f7);
+    background-size: 200% 100%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    animation: logo-shimmer 4s linear infinite;
   }
+  @keyframes logo-shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
   .logo-text span:last-child {
     font-size: 11px;
     font-weight: 500;
@@ -144,10 +147,12 @@
   }
 
   [data-theme="light"] .logo-text span:first-child {
-    background: linear-gradient(135deg, #7c3aed, #db2777);
+    background: linear-gradient(90deg, #7c3aed, #db2777, #7c3aed);
+    background-size: 200% 100%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    animation: logo-shimmer 4s linear infinite;
   }
   .header-meta { font-size: 11px; color: var(--text-dim); letter-spacing: 0; }
   .coffee-btn { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-dim);
