@@ -605,7 +605,7 @@
       </div>
       <div class="zoom-selector" id="zoom-selector">
         <label data-i18n="zoom">缩放</label>
-        <input type="range" class="zoom-slider" id="zoom-slider" min="0" max="5" step="1" value="4">
+        <input type="range" class="zoom-slider" id="zoom-slider" min="0" max="5" step="1" value="3">
         <span class="zoom-pct" id="zoom-pct">75%</span>
       </div>
     </div>
@@ -1356,7 +1356,13 @@ const zoomPct = document.getElementById('zoom-pct');
 zoomSlider.addEventListener('input', () => {
   if (_syncingZoom) return;
   state.zoomScale = ZOOM_STOPS[parseInt(zoomSlider.value)];
-  zoomPct.textContent = Math.round(state.zoomScale * 100) + '%';
+  // Show effective scale (actual render size / native canvas size)
+  const wrapper = document.querySelector('.canvas-wrapper');
+  if (wrapper) {
+    const maxW = wrapper.clientWidth - 48, maxH = wrapper.clientHeight - 48;
+    const fitRatio = Math.min(maxW / state.canvasW, maxH / state.canvasH, 1);
+    zoomPct.textContent = Math.round(fitRatio * state.zoomScale * 100) + '%';
+  }
   render();
 });
 
@@ -2170,22 +2176,10 @@ function syncZoomToFit() {
   const maxW = wrapper.clientWidth - 48, maxH = wrapper.clientHeight - 48;
   const W = state.canvasW, H = state.canvasH;
   const fitRatio = Math.min(maxW / W, maxH / H, 1);
-  // Find closest ZOOM_STOPS to fitRatio for slider position
-  let bestIdx = 0, bestDiff = Infinity;
-  ZOOM_STOPS.forEach(function(v, i) {
-    const diff = Math.abs(v - fitRatio);
-    if (diff < bestDiff) { bestDiff = diff; bestIdx = i; }
-  });
-  // But always render at zoomScale >= 1 to ensure canvas fills wrapper
-  // Find smallest ZOOM_STOPS >= 1 for rendering
-  let renderIdx = 3;
-  for (let i = 0; i < ZOOM_STOPS.length; i++) {
-    if (ZOOM_STOPS[i] >= 1) { renderIdx = i; break; }
-  }
   _syncingZoom = true;
-  zoomSlider.value = bestIdx;  // Slider position matches display
-  state.zoomScale = ZOOM_STOPS[renderIdx];  // Render at full fit (>= 100%)
-  zoomPct.textContent = Math.round(state.zoomScale * 100) + '%';
+  zoomSlider.value = 3;                    // Always 100% on init/resize
+  state.zoomScale = ZOOM_STOPS[3];         // = 1.0, matches slider index 3
+  zoomPct.textContent = Math.round(fitRatio * state.zoomScale * 100) + '%';
   _syncingZoom = false;
   render();
 }
