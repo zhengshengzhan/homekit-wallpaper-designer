@@ -605,8 +605,8 @@
       </div>
       <div class="zoom-selector" id="zoom-selector">
         <label data-i18n="zoom">缩放</label>
-        <input type="range" class="zoom-slider" id="zoom-slider" min="0" max="5" step="1" value="4">
-        <span class="zoom-pct" id="zoom-pct">75%</span>
+        <input type="range" class="zoom-slider" id="zoom-slider" min="0" max="5" step="1" value="3">
+        <span class="zoom-pct" id="zoom-pct">100%</span>
       </div>
     </div>
   </main>
@@ -2153,10 +2153,7 @@ updateLanguage();
 // Render after layout is complete
 requestAnimationFrame(() => {
   render();
-  // Sync zoom slider to actual fit level after first layout
-  requestAnimationFrame(() => {
-    syncZoomToFit();
-    const ro = new ResizeObserver(() => { requestAnimationFrame(render); });
+  const ro = new ResizeObserver(() => { requestAnimationFrame(render); });
     const wrapper = document.querySelector('.canvas-wrapper');
     if (wrapper) ro.observe(wrapper);
   });
@@ -2164,39 +2161,13 @@ requestAnimationFrame(() => {
 
 var _syncingZoom = false;
 var _resizing = false;
-function syncZoomToFit() {
-  const wrapper = document.querySelector('.canvas-wrapper');
-  if (!wrapper) return;
-  const maxW = wrapper.clientWidth - 48, maxH = wrapper.clientHeight - 48;
-  const W = state.canvasW, H = state.canvasH;
-  const fitRatio = Math.min(maxW / W, maxH / H, 1);
-  // Find closest ZOOM_STOPS to fitRatio for slider position
-  let bestIdx = 0, bestDiff = Infinity;
-  ZOOM_STOPS.forEach(function(v, i) {
-    const diff = Math.abs(v - fitRatio);
-    if (diff < bestDiff) { bestDiff = diff; bestIdx = i; }
-  });
-  // But always render at zoomScale >= 1 to ensure canvas fills wrapper
-  // Find smallest ZOOM_STOPS >= 1 for rendering
-  let renderIdx = 3;
-  for (let i = 0; i < ZOOM_STOPS.length; i++) {
-    if (ZOOM_STOPS[i] >= 1) { renderIdx = i; break; }
-  }
-  _syncingZoom = true;
-  zoomSlider.value = bestIdx;  // Slider position matches display
-  state.zoomScale = ZOOM_STOPS[renderIdx];  // Render at full fit (>= 100%)
-  zoomPct.textContent = Math.round(fitRatio * 100) + '%';
-  _syncingZoom = false;
-  render();
-}
 
-// Update zoom display on window resize (debounced)
+// Update zoom display on window resize (debounced) — just re-render, don't change slider
 var _resizeTimer;
 window.addEventListener('resize', function() {
   clearTimeout(_resizeTimer);
   _resizeTimer = setTimeout(function() {
     _resizing = true;
-    syncZoomToFit();
     render();
     _resizing = false;
   }, 150);
