@@ -2185,7 +2185,7 @@ function syncZoomToFit() {
   _syncingZoom = true;
   zoomSlider.value = bestIdx;  // Slider position matches display
   state.zoomScale = ZOOM_STOPS[renderIdx];  // Render at full fit (>= 100%)
-  zoomPct.textContent = Math.round(fitRatio * 100) + '%';
+  zoomPct.textContent = Math.round(state.zoomScale * 100) + '%';
   _syncingZoom = false;
   render();
 }
