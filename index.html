@@ -549,6 +549,8 @@
       <div class="toggle-row"><span class="control-label" data-i18n="brightness">整体亮度</span><div class="toggle" id="toggle-brightness" onclick="toggleEffect('brightness')"></div></div>
       <div class="control-row" id="brightness-intensity-row"><span class="control-label" data-i18n="brightnessIntensity">亮度强度</span><span class="control-value" id="val-brightness">0.00</span></div>
       <input type="range" class="slider" id="slider-brightness" min="-1" max="1" step="0.05" value="0" oninput="document.getElementById('val-brightness').textContent=parseFloat(this.value).toFixed(2);state.brightnessIntensity=parseFloat(this.value);render()">
+      <div class="control-row"><span class="control-label" data-i18n="imgOpacity">底图透明度</span><span class="control-value" id="val-img-opacity">45%</span></div>
+      <input type="range" class="slider" id="slider-img-opacity" min="10" max="80" step="5" value="45" oninput="document.getElementById('val-img-opacity').textContent=this.value+'%';state.imageOpacity=this.value/100;render()">
     </div>
     <div class="section" id="image-control-section">
       <div class="section-label" data-i18n="insertImage">房间图片</div>
@@ -562,8 +564,6 @@
         <input type="range" class="slider" id="slider-image-x" min="-50" max="150" step="1" value="100" oninput="document.getElementById('val-image-x').textContent=this.value+'%';state.imageX=this.value/100;render()">
         <div class="control-row"><span class="control-label" data-i18n="imgY">垂直位置</span><span class="control-value" id="val-image-y">0%</span></div>
         <input type="range" class="slider" id="slider-image-y" min="-50" max="150" step="1" value="0" oninput="document.getElementById('val-image-y').textContent=this.value+'%';state.imageY=this.value/100;render()">
-        <div class="control-row"><span class="control-label" data-i18n="imgOpacity">图片透明度</span><span class="control-value" id="val-image-opacity">45%</span></div>
-        <input type="range" class="slider" id="slider-image-opacity" min="10" max="80" step="5" value="45" oninput="document.getElementById('val-image-opacity').textContent=this.value+'%';state.imageOpacity=this.value/100;render()">
       </div>
     </div>
     <div class="section" id="icon-control-section">
@@ -744,7 +744,7 @@ const I18N = {
     imgScale: '图片缩放',
     imgX: '水平位置',
     imgY: '垂直位置',
-    imgOpacity: '图片透明度',
+    imgOpacity: '底图透明度',
     selectImage: '📷 选择图片',
     iconSize: '图标大小',
     iconX: '水平位置',
@@ -810,7 +810,7 @@ const I18N = {
     imgScale: 'Image Scale',
     imgX: 'Horizontal Position',
     imgY: 'Vertical Position',
-    imgOpacity: 'Image Opacity',
+    imgOpacity: 'BG Opacity',
     selectImage: '📷 Select Image',
     iconSize: 'Icon Size',
     iconX: 'Horizontal Position',
