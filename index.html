@@ -161,22 +161,6 @@
     transition: background 0.15s var(--ease), color 0.15s var(--ease); position: relative; white-space: nowrap; }
   .coffee-btn:hover { background: var(--surface2); color: var(--text); }
   .coffee-btn > span { position: relative; z-index: 1; }
-  .coffee-btn > span::after {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 25%, rgba(255,255,255,0.3) 75%, transparent 100%);
-    background-size: 300% 100%;
-    animation: coffee-sweep 4s ease-in-out infinite;
-    pointer-events: none;
-    border-radius: 4px;
-  }
-  @keyframes coffee-sweep {
-    0%   { background-position: 0% 0; opacity: 0; }
-    10%  { opacity: 1; }
-    90%  { opacity: 1; }
-    100% { background-position: 200% 0; opacity: 0; }
-  }
   .coffee-btn:hover > span { animation: coffee-shake 0.5s ease-in-out; }
   @keyframes coffee-shake {
     0%,100% { transform: translateX(0) rotate(0); }
