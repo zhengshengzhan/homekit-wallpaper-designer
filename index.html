@@ -178,6 +178,7 @@
   .coffee-popup img { width: 156px; height: 156px; border-radius: 8px; object-fit: cover; }
   .coffee-popup span { font-size: 11px; color: var(--text-dim); }
   .header-actions { display: flex; align-items: center; gap: 8px; height: 36px; flex-shrink: 0; }
+  .design-counter { font-size: 11px; color: var(--text-dim); white-space: nowrap; user-select: none; }
   .theme-btn {
     background: none;
     border: none;
@@ -466,6 +467,7 @@
 <header>
   <div class="logo"><div class="logo-ring"></div><div class="logo-text"><span>HomeKit</span><span>墙纸设计器</span></div></div>
   <div class="header-actions">
+    <div class="design-counter" id="design-counter"></div>
     <button class="coffee-btn" id="coffee-btn"><span data-i18n="coffeeBtn">🍮 请我喝咖啡</span>
       <div class="coffee-popup"><img src="PayQrcode.png" alt="PayQR"><span data-i18n="coffeeDesc">扫码支持开发者</span></div>
     </button>
@@ -484,9 +486,9 @@
       <div class="section-label" data-i18n="roomType">房间类型</div>
       <div class="room-grid" id="room-grid">
         <button class="room-btn active" data-room="living"><span class="room-icon">🛋️</span>客厅</button>
+        <button class="room-btn" data-room="dining"><span class="room-icon">🍽️</span>餐厅</button>
         <button class="room-btn" data-room="bedroom"><span class="room-icon">🛏️</span>卧室</button>
         <button class="room-btn" data-room="kitchen"><span class="room-icon">🍳</span>厨房</button>
-        <button class="room-btn" data-room="dining"><span class="room-icon">🍽️</span>餐厅</button>
         <button class="room-btn" data-room="bathroom"><span class="room-icon">🚿</span>浴室</button>
         <button class="room-btn" data-room="toilet"><span class="room-icon">🚽</span>厕所</button>
         <button class="room-btn" data-room="office"><span class="room-icon">💻</span>办公室</button>
@@ -769,6 +771,7 @@ const I18N = {
     exportFormat: '导出格式',
     engine: '渐变引擎 · v1.29 · by:Zan',
     coffeeBtn: '🍮 请我喝咖啡',
+    designCount: '已累计设计：{} 张',
     coffeeDesc: '扫码支持开发者',
     sizes: { 'iphone15pro': 'iPhone 15 Pro', 'iphone15': 'iPhone 15', 'iphone16pro': 'iPhone 16 Pro', 'iphone16': 'iPhone 16', 'iphone17pro': 'iPhone 17 Pro', 'iphone17': 'iPhone 17', 'iphone14promax': 'iPhone 14 Pro Max', 'iphone14': 'iPhone 14', 'ipadsquare': 'iPad 方形', 'ipadpro': 'iPad Pro', 'desktop': '桌面' }
   },
@@ -834,6 +837,7 @@ const I18N = {
     exportFormat: 'Format',
     engine: 'Gradient Engine · v1.29 · by:Zan',
     coffeeBtn: '🍮 Buy Me a Coffee',
+    designCount: 'Designs: {}',
     coffeeDesc: 'Scan to support developer',
     sizes: { 'iphone15pro': 'iPhone 15 Pro', 'iphone15': 'iPhone 15', 'iphone16pro': 'iPhone 16 Pro', 'iphone16': 'iPhone 16', 'iphone17pro': 'iPhone 17 Pro', 'iphone17': 'iPhone 17', 'iphone14promax': 'iPhone 14 Pro Max', 'iphone14': 'iPhone 14', 'ipadsquare': 'iPad Square', 'ipadpro': 'iPad Pro', 'desktop': 'Desktop' }
   }
@@ -1182,6 +1186,10 @@ function applyPreset(p, btn) {
   document.querySelectorAll('.dir-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.angle) === state.angle));
   renderStopsUI();
   render();
+  // 初始化累计设计计数
+  const initCount = parseInt(localStorage.getItem('hk-export-count') || '0');
+  const initEl = document.getElementById('design-counter');
+  if (initEl) initEl.textContent = (I18N[lang] || I18N.zh).designCount.replace('{}', initCount);
 }
 
 function renderStopsUI() {
@@ -1258,6 +1266,10 @@ document.getElementById('add-stop-btn').onclick = () => {
   state.stops.push({ color: insertColor, pos: insertPos });
   renderStopsUI();
   render();
+  // 初始化累计设计计数
+  const initCount = parseInt(localStorage.getItem('hk-export-count') || '0');
+  const initEl = document.getElementById('design-counter');
+  if (initEl) initEl.textContent = (I18N[lang] || I18N.zh).designCount.replace('{}', initCount);
 };
 
 function blendColors(c1, c2) {
@@ -2044,6 +2056,10 @@ function randomize() {
   
   renderStopsUI();
   render();
+  // 初始化累计设计计数
+  const initCount = parseInt(localStorage.getItem('hk-export-count') || '0');
+  const initEl = document.getElementById('design-counter');
+  if (initEl) initEl.textContent = (I18N[lang] || I18N.zh).designCount.replace('{}', initCount);
 }
 
 function exportImage(fmt) {
@@ -2057,6 +2073,11 @@ function exportImage(fmt) {
   link.download = 'homekit-' + (wasUploaded ? 'custom' : state.room) + '-' + state.canvasW + 'x' + state.canvasH + '.' + ext;
   link.href = canvas.toDataURL(mimeType, format === 'jpeg' ? 0.95 : undefined);
   link.click();
+  // 累计设计计数
+  const count = parseInt(localStorage.getItem('hk-export-count') || '0') + 1;
+  localStorage.setItem('hk-export-count', count);
+  const counterEl = document.getElementById('design-counter');
+  if (counterEl) counterEl.textContent = (I18N[lang] || I18N.zh).designCount.replace('{}', count);
 }
 
 
@@ -2155,6 +2176,10 @@ function updateLanguage() {
       el.textContent = t(el.dataset.i18n);
     }
   });
+  // Design counter
+  const ucCount = parseInt(localStorage.getItem('hk-export-count') || '0');
+  const ucEl = document.getElementById('design-counter');
+  if (ucEl) ucEl.textContent = (I18N[lang] || I18N.zh).designCount.replace('{}', ucCount);
   // Deco settings - blend mode buttons
   if (document.getElementById('deco-settings')) {
     document.querySelectorAll('.blend-tab').forEach(btn => {
