@@ -549,14 +549,6 @@
       <div class="toggle-row"><span class="control-label" data-i18n="brightness">整体亮度</span><div class="toggle" id="toggle-brightness" onclick="toggleEffect('brightness')"></div></div>
       <div class="control-row" id="brightness-intensity-row"><span class="control-label" data-i18n="brightnessIntensity">亮度强度</span><span class="control-value" id="val-brightness">0.00</span></div>
       <input type="range" class="slider" id="slider-brightness" min="-1" max="1" step="0.05" value="0" oninput="document.getElementById('val-brightness').textContent=parseFloat(this.value).toFixed(2);state.brightnessIntensity=parseFloat(this.value);render()">
-      <div class="control-row"><span class="control-label" data-i18n="gradientBlendMode">渐变混合模式</span><span class="control-value" id="val-blend-mode">正常</span></div>
-      <select id="gradient-blend-select" style="width:100%;margin-top:4px;padding:6px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px" onchange="setGradientBlendMode(this.value)">
-        <option value="source-over" data-i18n="blendNormal">正常</option>
-        <option value="multiply" data-i18n="blendMultiply">正片叠底</option>
-        <option value="screen" data-i18n="blendScreen">滤色</option>
-        <option value="overlay" data-i18n="blendOverlay">叠加</option>
-        <option value="soft-light" data-i18n="blendSoftLight">柔光</option>
-      </select>
     </div>
     <div class="section" id="image-control-section">
       <div class="section-label" data-i18n="insertImage">房间图片</div>
@@ -703,8 +695,7 @@ const state = {
   imageY: 0,
   imageOpacity: 0.45,
   zoomScale: 1,
-  brightnessIntensity: 0,
-  gradientBlendMode: 'source-over',
+  brightnessIntensity: 0
 };
 
 // 国际化
@@ -738,12 +729,6 @@ const I18N = {
     vignetteIntensity: '暗角强度',
     brightness: '整体亮度',
     brightnessIntensity: '亮度强度',
-    gradientBlendMode: '渐变混合模式',
-    blendMultiply: '正片叠底',
-    blendScreen: '滤色',
-    blendOverlay: '叠加',
-    blendSoftLight: '柔光',
-    blendNormal: '正常',
     decoSection: '房间装饰',
     deco: '房间装饰',
     decoCount: '贴纸数量',
@@ -1569,10 +1554,7 @@ function drawLinear(W, H) {
   const sorted = [...state.stops].sort((a,b) => a.pos - b.pos);
   sorted.forEach(s => grad.addColorStop(s.pos, s.color));
   ctx.fillStyle = grad;
-  ctx.save();
-  ctx.globalCompositeOperation = state.gradientBlendMode || 'source-over';
   ctx.fillRect(0, 0, W, H);
-  ctx.restore();
 }
 
 function drawRadial(W, H) {
@@ -1582,10 +1564,7 @@ function drawRadial(W, H) {
   const sorted = [...state.stops].sort((a,b) => a.pos - b.pos);
   sorted.forEach(s => grad.addColorStop(s.pos, s.color));
   ctx.fillStyle = grad;
-  ctx.save();
-  ctx.globalCompositeOperation = state.gradientBlendMode || 'source-over';
   ctx.fillRect(0, 0, W, H);
-  ctx.restore();
 }
 
 function drawMesh(W, H) {
@@ -1623,7 +1602,7 @@ function drawMesh(W, H) {
     return { x: ex, y: ey, color: stop.color };
   });
 
-  ctx.globalCompositeOperation = state.gradientBlendMode || 'source-over';
+  ctx.globalCompositeOperation = 'multiply';
 
   meshPoints.forEach(p => {
     // 每个锚点画一个大径向渐变
@@ -2155,13 +2134,6 @@ document.getElementById('size-selector').addEventListener('click', e => {
 
 // 语言切换
 const langBtn = document.getElementById('lang-toggle');
-function setGradientBlendMode(mode) {
-  state.gradientBlendMode = mode;
-  const labels = { 'source-over': lang === 'zh' ? '正常' : 'Normal', 'multiply': lang === 'zh' ? '正片叠底' : 'Multiply', 'screen': lang === 'zh' ? '滤色' : 'Screen', 'overlay': lang === 'zh' ? '叠加' : 'Overlay', 'soft-light': lang === 'zh' ? '柔光' : 'Soft Light' };
-  document.getElementById('val-blend-mode').textContent = labels[mode] || mode;
-  render();
-}
-
 function updateLanguage() {
   // Logo
   document.querySelector('.logo').innerHTML = '<div class="logo-ring"></div><div class="logo-text"><span>HomeKit</span><span>' + t('title').replace('HomeKit ', '') + '</span></div>';
