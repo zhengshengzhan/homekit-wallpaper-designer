@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HomeKit 墙纸设计器</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%237c3aed'/%3E%3Cstop offset='50%25' stop-color='%23db2777'/%3E%3Cstop offset='100%25' stop-color='%23ec4899'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='12' fill='none' stroke='url(%23g)' stroke-width='3'/%3E%3C/svg%3E">
   <style>
   :root {
     --bg: #000000;
@@ -698,6 +699,26 @@ const state = {
   brightnessIntensity: 0
 };
 
+// 全局计数器（Cloudflare KV）
+function _getGlobalCount() {
+  return fetch('/api/count')
+    .then(r => r.json())
+    .then(d => d.count || 0)
+    .catch(() => 0);
+}
+
+function _hitGlobalCount() {
+  return fetch('/api/count', { method: 'POST' })
+    .then(r => r.json())
+    .then(d => d.count || 0)
+    .catch(() => 0);
+}
+
+function _setCounterEl(count) {
+  const el = document.getElementById('design-counter');
+  if (el) el.textContent = (I18N[lang] || I18N.zh).designCount.replace('{}', count);
+}
+
 // 国际化
 let lang = localStorage.getItem('wallpaper-lang') || 'zh';
 let starSeed = 0;
@@ -1186,10 +1207,7 @@ function applyPreset(p, btn) {
   document.querySelectorAll('.dir-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.angle) === state.angle));
   renderStopsUI();
   render();
-  // 初始化累计设计计数
-  const initCount = parseInt(localStorage.getItem('hk-export-count') || '0');
-  const initEl = document.getElementById('design-counter');
-  if (initEl) initEl.textContent = (I18N[lang] || I18N.zh).designCount.replace('{}', initCount);
+  _getGlobalCount().then(_setCounterEl);
 }
 
 function renderStopsUI() {
@@ -1266,10 +1284,7 @@ document.getElementById('add-stop-btn').onclick = () => {
   state.stops.push({ color: insertColor, pos: insertPos });
   renderStopsUI();
   render();
-  // 初始化累计设计计数
-  const initCount = parseInt(localStorage.getItem('hk-export-count') || '0');
-  const initEl = document.getElementById('design-counter');
-  if (initEl) initEl.textContent = (I18N[lang] || I18N.zh).designCount.replace('{}', initCount);
+  _getGlobalCount().then(_setCounterEl);
 };
 
 function blendColors(c1, c2) {
@@ -2056,10 +2071,7 @@ function randomize() {
   
   renderStopsUI();
   render();
-  // 初始化累计设计计数
-  const initCount = parseInt(localStorage.getItem('hk-export-count') || '0');
-  const initEl = document.getElementById('design-counter');
-  if (initEl) initEl.textContent = (I18N[lang] || I18N.zh).designCount.replace('{}', initCount);
+  _getGlobalCount().then(_setCounterEl);
 }
 
 function exportImage(fmt) {
@@ -2073,11 +2085,8 @@ function exportImage(fmt) {
   link.download = 'homekit-' + (wasUploaded ? 'custom' : state.room) + '-' + state.canvasW + 'x' + state.canvasH + '.' + ext;
   link.href = canvas.toDataURL(mimeType, format === 'jpeg' ? 0.95 : undefined);
   link.click();
-  // 累计设计计数
-  const count = parseInt(localStorage.getItem('hk-export-count') || '0') + 1;
-  localStorage.setItem('hk-export-count', count);
-  const counterEl = document.getElementById('design-counter');
-  if (counterEl) counterEl.textContent = (I18N[lang] || I18N.zh).designCount.replace('{}', count);
+  // 累计设计计数（全局）
+  _hitGlobalCount().then(_setCounterEl);
 }
 
 
@@ -2177,9 +2186,7 @@ function updateLanguage() {
     }
   });
   // Design counter
-  const ucCount = parseInt(localStorage.getItem('hk-export-count') || '0');
-  const ucEl = document.getElementById('design-counter');
-  if (ucEl) ucEl.textContent = (I18N[lang] || I18N.zh).designCount.replace('{}', ucCount);
+  _getGlobalCount().then(_setCounterEl);
   // Deco settings - blend mode buttons
   if (document.getElementById('deco-settings')) {
     document.querySelectorAll('.blend-tab').forEach(btn => {
